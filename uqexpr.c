@@ -6,9 +6,12 @@ void command_arg_check(int argc, char** argv) {
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--define") == 0) {
             printf("Includes define\n");
+        } else if (strcmp(argv[i], "--forloop") == 0) {
+            printf("Includes for loop\n");
+        } else if (strcmp(argv[i], "--significantfigs") == 0) {
+            printf("Includes significant figs\n");
         }
     }
-
 }
 
 
