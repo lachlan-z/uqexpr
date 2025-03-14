@@ -7,16 +7,20 @@ typedef struct {
     double value;
 } Var;
 
-Var variables[10] //Change to dynamically allocate memory;
+// initialise pointer to variables for dynamic memory allocation later 
+Var* variables = NULL;
 
 void command_arg_check(int argc, char** argv) {
      
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--define") == 0) {
+            // add error checking
             printf("Includes define\n");
 
             char* string_parse = strtok(argv[i+1], "=");
             
+            variables = realloc(variables, sizeof(Var) + 1);
+
             variables[0].name = malloc(strlen(string_parse)+1);
             strcpy(variables[0].name, string_parse);
 
