@@ -7,7 +7,7 @@ typedef struct {
     double value;
 } Var;
 
-Var variables[10];
+Var variables[10] //Change to dynamically allocate memory;
 
 void command_arg_check(int argc, char** argv) {
      
