@@ -1,25 +1,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-typedef struct {
-    char* name;
-    double value;
+    
+typedef struct {                                                                 
+    char* name;                                                                  
+    double value;                                                                
 } Var;
 
-typedef struct {
-    char* name;
-    double start;
-    double increment;
-    double end;
-} Loop;
+typedef struct {                                                                 
+    char* name;                                                                  
+    double start;                                                                
+    double increment;                                                            
+    double end;                                                                  
+} Loop; 
 
-// initialise pointer to variables for dynamic memory allocation later 
-Var* variables = NULL;
-Loop* loops = NULL;
-
-void command_arg_check(int argc, char** argv) {
-     
+void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count) {     
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--define") == 0) {
             // add error checking
@@ -27,40 +22,53 @@ void command_arg_check(int argc, char** argv) {
 
             char* string_parse = strtok(argv[i+1], "=");
             
-            variables = realloc(variables, sizeof(Var) + 1);
+            *variables = realloc(*variables, sizeof(Var) * (*variables_count + 1));
 
-            variables[0].name = malloc(strlen(string_parse)+1);
-            strcpy(variables[0].name, string_parse);
+            (*variables)[*variables_count].name = malloc(strlen(string_parse) + 1);
+            strcpy((*variables)[*variables_count].name, string_parse);
 
-            variables[0].value = atof(strtok(NULL, "="));
+            (*variables)[*variables_count].value = atof(strtok(NULL, "="));  
             
-            printf("%s = %f", variables[0].name, variables[0].value);
+            (*variables_count)++;
+            
+            for (int l = 0; l < *variables_count; l++) {
+                printf("variables[%d]: %s = %f", l, (*variables)[l].name, (*variables)[l].value);
+            }
         } else if (strcmp(argv[i], "--forloop") == 0) {
+            // add error checking
             printf("Includes for loop\n");
 
             char* string_parse = strtok(argv[i+1], ",");
 
-            loops = realloc(loops, sizeof(Loop) + 1);
+            *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));
  
-            loops[0].name = malloc(strlen(string_parse)+1);
-            strcpy(loops[0].name, string_parse);
+            (*loops)[*loops_count].name = malloc(strlen(string_parse) + 1);
+            strcpy((*loops)[*loops_count].name, string_parse);
  
-            loops[0].start = atof(strtok(NULL, ","));
-            loops[0].increment = atof(strtok(NULL, ","));
-            loops[0].end = atof(strtok(NULL, ","));
+            (*loops)[*loops_count].start = atof(strtok(NULL, ","));
+            (*loops)[*loops_count].increment = atof(strtok(NULL, ","));
+            (*loops)[*loops_count].end = atof(strtok(NULL, ","));
 
-            printf("name:%s start:%f increment:%f end:%f\n", loops[0].name, loops[0].start, loops[0].increment, loops[0].end);
+            (*loops_count)++;
+
+            for (int l = 0; l < *loops_count; l++) {
+                printf("loops[%d]: %s = %f", l, (*loops)[l].name, (*loops)[l].start), (*loops)[l].increment, (*loops)[l].end;
+            }
         } else if (strcmp(argv[i], "--significantfigs") == 0) {
             printf("Includes significant figs\n");
         }
     }
 }
 
-
 int main(int argc, char** argv) {
-    
+    Var* variables = NULL; 
+    Loop* loops = NULL;                                                              
+                                                                                   
+    int variables_count = 0;                                                         
+    int loops_count = 0;  
+
     printf("Welcome to uqexpr.\nThis program was writted by s4808239.\n");
-    command_arg_check(argc, argv);
+    command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count);
     return 0;
 
 }
