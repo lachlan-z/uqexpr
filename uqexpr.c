@@ -14,7 +14,7 @@ typedef struct {
     double end;                                                                  
 } Loop; 
 
-void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count) {     
+void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs) {     
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--define") == 0) {
             // add error checking
@@ -32,7 +32,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             (*variables_count)++;
             
             for (int l = 0; l < *variables_count; l++) {
-                printf("variables[%d]: %s = %f", l, (*variables)[l].name, (*variables)[l].value);
+                printf("variables[%d]: %s = %f\n", l, (*variables)[l].name, (*variables)[l].value);
             }
         } else if (strcmp(argv[i], "--forloop") == 0) {
             // add error checking
@@ -52,10 +52,11 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             (*loops_count)++;
 
             for (int l = 0; l < *loops_count; l++) {
-                printf("loops[%d]: %s = %f", l, (*loops)[l].name, (*loops)[l].start), (*loops)[l].increment, (*loops)[l].end;
+                printf("loops[%d]: name:%s start:%f inc:%f end:%f\n", l, (*loops)[l].name, (*loops)[l].start, (*loops)[l].increment, (*loops)[l].end);
             }
         } else if (strcmp(argv[i], "--significantfigs") == 0) {
             printf("Includes significant figs\n");
+            (*significant_figs) = atoi(argv[i+1]);
         }
     }
 }
@@ -65,10 +66,11 @@ int main(int argc, char** argv) {
     Loop* loops = NULL;                                                              
                                                                                    
     int variables_count = 0;                                                         
-    int loops_count = 0;  
+    int loops_count = 0;
+    int significant_figs = 4;
 
     printf("Welcome to uqexpr.\nThis program was writted by s4808239.\n");
-    command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count);
+    command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count, &significant_figs);
     return 0;
 
 }
