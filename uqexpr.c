@@ -7,8 +7,16 @@ typedef struct {
     double value;
 } Var;
 
+typedef struct {
+    char* name;
+    double start;
+    double increment;
+    double end;
+} Loop;
+
 // initialise pointer to variables for dynamic memory allocation later 
 Var* variables = NULL;
+Loop* loops = NULL;
 
 void command_arg_check(int argc, char** argv) {
      
@@ -29,6 +37,19 @@ void command_arg_check(int argc, char** argv) {
             printf("%s = %f", variables[0].name, variables[0].value);
         } else if (strcmp(argv[i], "--forloop") == 0) {
             printf("Includes for loop\n");
+
+            char* string_parse = strtok(argv[i+1], ",");
+
+            loops = realloc(loops, sizeof(Loop) + 1);
+ 
+            loops[0].name = malloc(strlen(string_parse)+1);
+            strcpy(loops[0].name, string_parse);
+ 
+            loops[0].start = atof(strtok(NULL, ","));
+            loops[0].increment = atof(strtok(NULL, ","));
+            loops[0].end = atof(strtok(NULL, ","));
+
+            printf("name:%s start:%f increment:%f end:%f\n", loops[0].name, loops[0].start, loops[0].increment, loops[0].end);
         } else if (strcmp(argv[i], "--significantfigs") == 0) {
             printf("Includes significant figs\n");
         }
