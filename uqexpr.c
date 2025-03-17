@@ -55,6 +55,13 @@ void variable_check_loop(char* variable) {
     }    
 }
 
+void variable_check_sigfig(char* variable) {
+    if ((atof(variable) < 2) || (atof(variable) > 8)) { 
+        fprintf(stderr, "Usage: ./uqexpr [--forloop string] [--define string] [--significantfigs 2..8] [inputfile]\n");
+        exit(11);
+    }
+}
+
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs) {     
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--define") == 0) {
@@ -99,6 +106,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             }
         } else if (strcmp(argv[i], "--significantfigs") == 0) {
             variable_check_null(argv[i+1]);
+            variable_check_sigfig(argv[i+1]);
             printf("Includes significant figs\n");
             (*significant_figs) = atoi(argv[i+1]);
         } else if ((i == argc - 1) && (argv[i][0] != '-') && (strchr(argv[i], '.') != NULL)) {
