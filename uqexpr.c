@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
     
 typedef struct {                                                                 
     char* name;                                                                  
@@ -14,12 +15,33 @@ typedef struct {
     double end;                                                                  
 } Loop; 
 
+void variable_check_define(char* variable) {
+    char* string_parse = strtok(strdup(variable), "=");
+
+    if (string_parse == NULL) {
+        fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
+        exit(12);
+    }
+    
+    if (!((size_t)1 <= strlen(string_parse) && strlen(string_parse) <= (size_t)25)) {
+        fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
+        exit(12);
+    }
+
+    for (size_t l = 0; l < strlen(string_parse); l++) {
+        if (isalpha(string_parse[l]) == 0) {
+            fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
+            exit(12);
+        }
+    }
+}
+
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs) {     
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--define") == 0) {
             // add error checking
             printf("Includes define\n");
-
+            variable_check_define(argv[i+1]);
             char* string_parse = strtok(argv[i+1], "=");
             
             *variables = realloc(*variables, sizeof(Var) * (*variables_count + 1));
