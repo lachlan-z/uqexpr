@@ -57,7 +57,9 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
         } else if (strcmp(argv[i], "--significantfigs") == 0) {
             printf("Includes significant figs\n");
             (*significant_figs) = atoi(argv[i+1]);
-        }
+        } else if ((i == argc - 1) && (argv[i][0] != '-') && (strchr(argv[i], '.') != NULL)) {
+            printf("filename check included");
+        } 
     }
 }
 
