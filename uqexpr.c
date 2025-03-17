@@ -15,6 +15,13 @@ typedef struct {
     double end;                                                                  
 } Loop; 
 
+void variable_check_null(char* variable) {
+    if (variable == NULL) {
+        fprintf(stderr, "Usage: ./uqexpr [--forloop string] [--define string] [--significantfigs 2..8] [inputfile]\n");
+        exit(11);
+    }
+}
+
 void variable_check_define(char* variable) {
     char* string_parse = strtok(strdup(variable), "=");
 
@@ -41,6 +48,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
         if (strcmp(argv[i], "--define") == 0) {
             // add error checking
             printf("Includes define\n");
+            variable_check_null(argv[i+1]);
             variable_check_define(argv[i+1]);
             char* string_parse = strtok(argv[i+1], "=");
             
@@ -59,7 +67,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
         } else if (strcmp(argv[i], "--forloop") == 0) {
             // add error checking
             printf("Includes for loop\n");
-
+            variable_check_null(argv[i+1]);
             char* string_parse = strtok(argv[i+1], ",");
 
             *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));
@@ -77,6 +85,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
                 printf("loops[%d]: name:%s start:%f inc:%f end:%f\n", l, (*loops)[l].name, (*loops)[l].start, (*loops)[l].increment, (*loops)[l].end);
             }
         } else if (strcmp(argv[i], "--significantfigs") == 0) {
+            variable_check_null(argv[i+1]);
             printf("Includes significant figs\n");
             (*significant_figs) = atoi(argv[i+1]);
         } else if ((i == argc - 1) && (argv[i][0] != '-') && (strchr(argv[i], '.') != NULL)) {
