@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -std=gnu99
+CFLAGS = -Wall -Wextra -pedantic -std=gnu99 -g
 
 all: uqexpr
 
