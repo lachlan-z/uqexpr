@@ -44,7 +44,15 @@ void variable_check_define(char* variable) {
 void variable_check_loop(char* variable) {
     char* string_parse = strtok(strdup(variable), ",");
     variable_check_name(string_parse);
+    
+    double start = atof(strtok(NULL, ","));
+    double increment = atof(strtok(NULL, ","));
+    double end = atof(strtok(NULL, ","));
 
+    if ((increment == 0) || ((start < end) && (increment < 0)) || ((start > end) && (increment > 0))) {
+        fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
+        exit(12);
+    }    
 }
 
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs) {     
