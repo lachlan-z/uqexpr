@@ -22,25 +22,29 @@ void variable_check_null(char* variable) {
     }
 }
 
-void variable_check_define(char* variable) {
-    char* string_parse = strtok(strdup(variable), "=");
-
-    if (string_parse == NULL) {
-        fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
-        exit(12);
-    }
-    
-    if (!((size_t)1 <= strlen(string_parse) && strlen(string_parse) <= (size_t)25)) {
+void variable_check_name(char* variable_name) {
+    if (!((size_t)1 <= strlen(variable_name) && strlen(variable_name) <= (size_t)25)) {
         fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
         exit(12);
     }
 
-    for (size_t l = 0; l < strlen(string_parse); l++) {
-        if (isalpha(string_parse[l]) == 0) {
+    for (size_t l = 0; l < strlen(variable_name); l++) {
+        if (isalpha(variable_name[l]) == 0) {
             fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
             exit(12);
         }
     }
+}
+
+void variable_check_define(char* variable) {
+    char* string_parse = strtok(strdup(variable), "=");
+    variable_check_name(string_parse);
+}
+
+void variable_check_loop(char* variable) {
+    char* string_parse = strtok(strdup(variable), ",");
+    variable_check_name(string_parse);
+
 }
 
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs) {     
@@ -68,6 +72,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             // add error checking
             printf("Includes for loop\n");
             variable_check_null(argv[i+1]);
+            variable_check_loop(argv[i+1]); 
             char* string_parse = strtok(argv[i+1], ",");
 
             *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));
