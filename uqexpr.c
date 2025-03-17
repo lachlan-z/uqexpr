@@ -109,8 +109,13 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             variable_check_sigfig(argv[i+1]);
             printf("Includes significant figs\n");
             (*significant_figs) = atoi(argv[i+1]);
-        } else if ((i == argc - 1) && (argv[i][0] != '-') && (strchr(argv[i], '.') != NULL)) {
+        } else if ((i == argc - 1) && (argv[i][0] != '-') && (i != 0)) {
             printf("filename check included");
+            FILE* file = fopen(argv[i], "r");
+            if (file == NULL) {
+                fprintf(stderr, "uqexpr: unable to open file \"%s\" for reading\n", argv[i]);
+                exit(4);
+            }
         } 
     }
 }
