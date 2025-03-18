@@ -64,6 +64,7 @@ void variable_check_sigfig(char* variable) {
 
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs) {     
     for (int i = 0; i < argc; i++) {
+        printf("%s\n", argv[i]);
         if (strcmp(argv[i], "--define") == 0) {
             // add error checking
             printf("Includes define\n");
@@ -109,7 +110,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             variable_check_sigfig(argv[i+1]);
             printf("Includes significant figs\n");
             (*significant_figs) = atoi(argv[i+1]);
-        } else if ((i == argc - 1) && (argv[i][0] != '-') && (i != 0)) {
+        } else if ((i > 0) && (argv[i][0] != '-') && (argv[i-1][0] != '-') && (i != 0)) {
             printf("filename check included");
             FILE* file = fopen(argv[i], "r");
             if (file == NULL) {
@@ -117,6 +118,24 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
                 exit(4);
             }
         } 
+    }
+    
+    for (int i = 0; i < *loops_count; i++) {
+        for (int l = 0; l < *loops_count; l++) {
+            if ((i != l) && (strcmp((*loops)[i].name, (*loops)[l].name) == 0)) {
+                fprintf(stderr, "uqexpr: duplicate variables were detected\n");
+                exit(5);
+            }
+        }
+    }
+
+    for (int i = 0; i < *variables_count; i++) {
+        for (int l = 0; l < *variables_count; l++) {
+            if ((i != l) && (strcmp((*variables)[i].name, (*variables)[l].name) == 0)) {
+                fprintf(stderr, "uqexpr: duplicate variables were detected\n");
+                exit(5);
+            }
+        }
     }
 }
 
@@ -130,7 +149,7 @@ int main(int argc, char** argv) {
 
     printf("Welcome to uqexpr.\nThis program was writted by s4808239.\n");
     command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count, &significant_figs);
+    
     return 0;
-
 }
 
