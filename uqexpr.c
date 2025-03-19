@@ -109,7 +109,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             variable_check_null(argv[i+1]);
             variable_check_sigfig(argv[i+1]);
             printf("Includes significant figs\n");
-            (*significant_figs) = atoi(argv[i+1]);
+            (*significant_figs) = atoi(argv[i+1]) + 1;
         } else if ((i > 0) && (argv[i][0] != '-') && (argv[i-1][0] != '-') && (i != 0)) {
             printf("filename check included");
             FILE* file = fopen(argv[i], "r");
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
     int variables_count = 0;                                                         
     int loops_count = 0;
     // check functionality of sigfigs in demo-uqexpr
-    int significant_figs = 4;
+    int significant_figs = 5;
 
     command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count, &significant_figs);
    
