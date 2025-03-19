@@ -145,7 +145,6 @@ int main(int argc, char** argv) {
                                                                                    
     int variables_count = 0;                                                         
     int loops_count = 0;
-    // check functionality of sigfigs in demo-uqexpr
     int significant_figs = 5;
 
     command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count, &significant_figs);
@@ -160,7 +159,29 @@ int main(int argc, char** argv) {
             fprintf(stdout, "%s = %.*g\n", variables[i].name, significant_figs, variables[i].value);
         }
     }
-    
+
+    if (loops == NULL) {
+        fprintf(stdout, "There are no loop variables.\n");
+    } else {
+        fprintf(stdout, "Loop variables:\n");
+        for (int i = 0; i < loops_count; i++) {
+            fprintf(stdout, "%s = %.*g (%.*g, %.*g, %.*g)\n", loops[i].name, significant_figs, loops[i].start, significant_figs, loops[i].start, significant_figs, loops[i].increment, significant_figs, loops[i].end);
+        }
+    }
+
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
