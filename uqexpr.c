@@ -145,10 +145,21 @@ int main(int argc, char** argv) {
                                                                                    
     int variables_count = 0;                                                         
     int loops_count = 0;
+    // check functionality of sigfigs in demo-uqexpr
     int significant_figs = 4;
 
-    printf("Welcome to uqexpr.\nThis program was writted by s4808239.\n");
     command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count, &significant_figs);
+   
+    fprintf(stdout, "Welcome to uqexpr.\nThis program was writted by s4808239.\n");
+    
+    if (variables == NULL) {
+        fprintf(stdout, "There are no variables.\n");
+    } else {
+        fprintf(stdout, "Variables:\n");
+        for (int i = 0; i < variables_count; i++) {
+            fprintf(stdout, "%s = %.*g\n", variables[i].name, significant_figs, variables[i].value);
+        }
+    }
     
     return 0;
 }
