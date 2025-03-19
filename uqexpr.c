@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <tinyexpr.h>
     
 typedef struct {                                                                 
     char* name;                                                                  
@@ -185,6 +186,10 @@ char** separate_line(char* string, char delim) {
     return tokens;
 }
 
+//te_variable struct_to_te_var(Var** variables, Loop** loops, int* variables_count, int* loops_count) {
+  //  te_variable 
+//}
+
 int main(int argc, char** argv) {
     Var* variables = NULL; 
     Loop* loops = NULL;
@@ -195,7 +200,9 @@ int main(int argc, char** argv) {
     int significant_figs = 5;
 
     command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count, &significant_figs, &file);
-   
+    
+    
+
     fprintf(stdout, "Welcome to uqexpr.\nThis program was writted by s4808239.\n");
     
     if (variables == NULL) {
@@ -225,6 +232,17 @@ int main(int argc, char** argv) {
             if (line[0] == '#') {
                 continue;
             } else {
+                char** separated_line = separate_line(line, '=');
+                if (separated_line[1] == NULL) {
+                    int error_interp = 0;
+                    double result = te_interp(line, &error_interp);
+
+                    if (error_interp == 0) {
+                        fprintf(stdout, "Result = %.*g\n", significant_figs, result);
+                    } else {
+                        fprintf(stderr, "Invalid command, expression or assignment operation\n");
+                    }
+                } 
                 return 0;
             }    
         }
