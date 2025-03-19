@@ -221,6 +221,12 @@ int main(int argc, char** argv) {
         while (1) {
             char* line = read_line(stdin);
             printf("\nstdin: %s\n", line);
+            
+            if (line[0] == '#') {
+                continue;
+            } else {
+                return 0;
+            }    
         }
     } else {
         // add code to handle when a file is inputted
