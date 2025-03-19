@@ -62,7 +62,7 @@ void variable_check_sigfig(char* variable) {
     }
 }
 
-void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs) {     
+void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs, FILE** file) {     
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--define") == 0) {
             variable_check_null(argv[i+1]);
@@ -98,9 +98,9 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             
             (*significant_figs) = atoi(argv[i+1]) + 1;
         } else if ((i > 0) && (argv[i][0] != '-') && (argv[i-1][0] != '-') && (i != 0)) {
-            FILE* file = fopen(argv[i], "r");
+            (*file) = fopen(argv[i], "r");
             
-            if (file == NULL) {
+            if ((*file) == NULL) {
                 fprintf(stderr, "uqexpr: unable to open file \"%s\" for reading\n", argv[i]);
                 exit(4);
             }
@@ -126,15 +126,75 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
     }
 }
 
+#define INITIAL_BUFFER_SIZE 80
+char* read_line(FILE* stream) {
+
+    int bufferSize = INITIAL_BUFFER_SIZE;
+        char* buffer = malloc(sizeof(char) * bufferSize);
+    int numRead = 0;
+        int next;
+
+    if (feof(stream)) {
+        return NULL;
+    }
+
+    while (1) {
+        next = fgetc(stream);
+        
+        if (next == EOF && numRead == 0) {
+            free(buffer);
+            return NULL;
+        }
+
+        if (numRead == bufferSize - 1) {
+            bufferSize *= 2;
+            buffer = realloc(buffer, sizeof(char) * bufferSize);
+        }
+
+        if (next == '\n' || next == EOF) {
+            buffer[numRead] = '\0';
+            break;
+        }
+
+        buffer[numRead++] = next;
+    }
+    return buffer;
+}
+
+/**
+ * Separates segments of string separated by delim into array of char*
+**/
+char** separate_line(char* string, char delim) {
+    char** tokens = malloc(sizeof(char*));
+    tokens[0] = NULL;
+
+    char delimiters[] = {delim, '\0'};
+
+    int numTokens = 0;
+    char* token = strtok(string, delimiters);
+
+    while (token) {
+        tokens[numTokens] = strdup(token);
+        numTokens++;
+        tokens = realloc(tokens, sizeof(char*) * (numTokens + 1));
+        tokens[numTokens] = NULL;
+
+        token = strtok(NULL, delimiters);
+    }
+
+    return tokens;
+}
+
 int main(int argc, char** argv) {
     Var* variables = NULL; 
-    Loop* loops = NULL;                                                              
+    Loop* loops = NULL;
+    FILE* file = NULL;
                                                                                    
     int variables_count = 0;                                                         
     int loops_count = 0;
     int significant_figs = 5;
 
-    command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count, &significant_figs);
+    command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count, &significant_figs, &file);
    
     fprintf(stdout, "Welcome to uqexpr.\nThis program was writted by s4808239.\n");
     
@@ -155,7 +215,17 @@ int main(int argc, char** argv) {
             fprintf(stdout, "%s = %.*g (%.*g, %.*g, %.*g)\n", loops[i].name, significant_figs, loops[i].start, significant_figs, loops[i].start, significant_figs, loops[i].increment, significant_figs, loops[i].end);
         }
     }
-
+    
+    if (file == NULL) {
+        fprintf(stdout, "Please enter your expressions and assignment operations to be evaluated.\n");
+        while (1) {
+            char* line = read_line(stdin);
+            printf("\nstdin: %s\n", line);
+        }
+    } else {
+        // add code to handle when a file is inputted
+        return 0;
+    }
     return 0;
 }
 
