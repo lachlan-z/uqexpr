@@ -64,10 +64,7 @@ void variable_check_sigfig(char* variable) {
 
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs) {     
     for (int i = 0; i < argc; i++) {
-        printf("%s\n", argv[i]);
         if (strcmp(argv[i], "--define") == 0) {
-            // add error checking
-            printf("Includes define\n");
             variable_check_null(argv[i+1]);
             variable_check_define(argv[i+1]);
             char* string_parse = strtok(argv[i+1], "=");
@@ -80,13 +77,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             (*variables)[*variables_count].value = atof(strtok(NULL, "="));  
             
             (*variables_count)++;
-            
-            for (int l = 0; l < *variables_count; l++) {
-                printf("variables[%d]: %s = %f\n", l, (*variables)[l].name, (*variables)[l].value);
-            }
         } else if (strcmp(argv[i], "--forloop") == 0) {
-            // add error checking
-            printf("Includes for loop\n");
             variable_check_null(argv[i+1]);
             variable_check_loop(argv[i+1]); 
             char* string_parse = strtok(argv[i+1], ",");
@@ -101,18 +92,14 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             (*loops)[*loops_count].end = atof(strtok(NULL, ","));
 
             (*loops_count)++;
-
-            for (int l = 0; l < *loops_count; l++) {
-                printf("loops[%d]: name:%s start:%f inc:%f end:%f\n", l, (*loops)[l].name, (*loops)[l].start, (*loops)[l].increment, (*loops)[l].end);
-            }
         } else if (strcmp(argv[i], "--significantfigs") == 0) {
             variable_check_null(argv[i+1]);
             variable_check_sigfig(argv[i+1]);
-            printf("Includes significant figs\n");
+            
             (*significant_figs) = atoi(argv[i+1]) + 1;
         } else if ((i > 0) && (argv[i][0] != '-') && (argv[i-1][0] != '-') && (i != 0)) {
-            printf("filename check included");
             FILE* file = fopen(argv[i], "r");
+            
             if (file == NULL) {
                 fprintf(stderr, "uqexpr: unable to open file \"%s\" for reading\n", argv[i]);
                 exit(4);
