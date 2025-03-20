@@ -40,6 +40,7 @@ void variable_check_name(char* variable_name) {
 void variable_check_define(char* variable) {
     char* string_parse = strtok(strdup(variable), "=");
     variable_check_name(string_parse);
+    free(string_parse);
 }
 
 void variable_check_loop(char* variable) {
@@ -49,6 +50,8 @@ void variable_check_loop(char* variable) {
     double start = atof(strtok(NULL, ","));
     double increment = atof(strtok(NULL, ","));
     double end = atof(strtok(NULL, ","));
+    
+    free(string_parse);
 
     if ((increment == 0) || ((start < end) && (increment < 0)) || ((start > end) && (increment > 0))) {
         fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
@@ -65,6 +68,8 @@ void variable_check_sigfig(char* variable) {
 
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs, FILE** file) {     
     for (int i = 0; i < argc; i++) {      
+        //printf("%d: %s\n", i, argv[i]);
+        //printf("argc: %d\n", argc);
         if (strcmp(argv[i], "--define") == 0) {
             variable_check_null(argv[i+1]);
             variable_check_define(argv[i+1]);
@@ -78,6 +83,8 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             (*variables)[*variables_count].value = atof(strtok(NULL, "="));  
             
             (*variables_count)++;
+
+            free(string_parse);
         } else if (strcmp(argv[i], "--forloop") == 0) {
             variable_check_null(argv[i+1]);
             variable_check_loop(argv[i+1]); 
@@ -98,7 +105,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             variable_check_sigfig(argv[i+1]);
             
             (*significant_figs) = atoi(argv[i+1]) + 1;
-        } else if ((i == argc) && (argv[i][0] != '-') && (argv[i-1][0] != '-')) {
+        } else if ((i == argc - 1) && (argv[i][0] != '-') && (argv[i-1][0] != '-')) {
             (*file) = fopen(argv[i], "r");
             if ((*file) == NULL) {
                 fprintf(stderr, "uqexpr: unable to open file \"%s\" for reading\n", argv[i]);
@@ -107,14 +114,13 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
         } else if (argv[i][0] == '-' && argv[i][1] == '-') {
             fprintf(stderr, "Usage: ./uqexpr [--forloop string] [--define string] [--significantfigs 2..8] [inputfilename]\n");
             exit(11);
+        } else if (strcmp(argv[i], "") == 0 || ((i != argc-1) && (argv[i][0] == '/'))) {
+             fprintf(stderr, "Usage: ./uqexpr [--forloop string] [--define string] [--significantfigs 2..8] [inputfilename]\n");
+             exit(11);                                                            
         }
 
-        if (strcmp(argv[i], "") == 0) {
-            fprintf(stderr, "Usage: ./uqexpr [--forloop string] [--define string] [--significantfigs 2..8] [inputfilename]\n");
-            exit(11);
-        }
     }
-  
+     // ee 
     for (int i = 0; i < *loops_count; i++) {
         for (int l = 0; l < *loops_count; l++) {
             if ((i != l) && (strcmp((*loops)[i].name, (*loops)[l].name) == 0)) {
@@ -256,7 +262,9 @@ int main(int argc, char** argv) {
     } else {
         // add code to handle when a file is inputted
         return 0;
+
     }
+
     return 0;
 }
 

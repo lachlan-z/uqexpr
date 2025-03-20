@@ -6,4 +6,4 @@ LIBS = -L/local/courses/csse2310/lib -ltinyexpr -lm
 all: uqexpr
 
 uqexpr: uqexpr.c
-	$(CC) -o uqexpr $(CFLAGS) $(INCLUDES) uqexpr.c $(LIBS)
+	$(CC) $(CFLAGS) $(INCLUDES) uqexpr.c $(LIBS) -o uqexpr
