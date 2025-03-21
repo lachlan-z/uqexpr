@@ -37,6 +37,19 @@ void variable_check_name(char* variable_name) {
     }
 }
 
+void value_check(char* value) {
+    int decimal_count = 0; 
+        for (size_t i = 0; i < strlen(value); i++) {
+            if (value[i] == '.') {
+                decimal_count++;
+        }
+        if (isdigit(value[i]) == 0 && value[i] != '.') {
+            fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
+            exit(12);
+        }
+    }
+}
+
 void variable_check_define(char* variable) {
     char* string_parse = strtok(strdup(variable), "=");
     char* value = strtok(NULL, "=");
@@ -56,16 +69,8 @@ void variable_check_define(char* variable) {
         fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
         exit(12);
     }
-    int decimal_count = 0; 
-    for (size_t i = 0; i < strlen(value); i++) {
-        if (value[i] == '.') {
-            decimal_count++;
-        }
-        if (isdigit(value[i]) == 0 && value[i] != '.') {
-            fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
-            exit(12);
-        }
-    }
+
+    value_check(value);
     variable_check_name(string_parse);
     free(string_parse);
 }
@@ -74,13 +79,23 @@ void variable_check_loop(char* variable) {
     char* string_parse = strtok(strdup(variable), ",");
     variable_check_name(string_parse);
     
-    double start = atof(strtok(NULL, ","));
-    double increment = atof(strtok(NULL, ","));
-    double end = atof(strtok(NULL, ","));
-    
-    free(string_parse);
+    char* start = strtok(NULL, ",");
+    char* increment = strtok(NULL, ",");
+    char* end = strtok(NULL, ",");
+    if (string_parse == NULL || start == NULL || increment == NULL || end == NULL) {
+        fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
+        exit(12);
+    }
 
-    if ((increment == 0) || ((start < end) && (increment < 0)) || ((start > end) && (increment > 0))) {
+    value_check(start);
+    value_check(increment);
+    value_check(end);
+
+    double start_d = atof(start);
+    double increment_d = atof(increment);
+    double end_d = atof(end);
+    
+    if ((increment_d == 0) || ((start_d < end_d) && (increment_d < 0)) || ((start_d > end_d) && (increment_d > 0))) {
         fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
         exit(12);
     }    
