@@ -39,6 +39,19 @@ void variable_check_name(char* variable_name) {
 
 void variable_check_define(char* variable) {
     char* string_parse = strtok(strdup(variable), "=");
+    char* value = strtok(NULL, "=");
+
+    if (string_parse == NULL || value == NULL) {
+        fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
+        exit(12);
+    }
+    
+    for (size_t i = 0; i < strlen(value); i++) {
+        if (isdigit(value[i]) == 0) {
+            fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
+            exit(12);
+        }
+    }
     variable_check_name(string_parse);
     free(string_parse);
 }
