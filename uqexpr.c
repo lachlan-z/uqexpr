@@ -66,8 +66,22 @@ void variable_check_sigfig(char* variable) {
     }
 }
 
+void free_variables(Var* variables, int variables_count) {
+    for (int i = 0; i < variables_count; i++) {
+        free(variables[i].name);
+    }
+    free(variables);
+}
+
+void free_loops(Loop* loops, int loops_count) {
+    for (int i = 0; i < loops_count; i++) {
+        free(loops[i].name);
+    }
+    free(loops);
+}
+
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int* variables_count, int* loops_count, int* significant_figs, FILE** file) {     
-    for (int i = 0; i < argc; i++) {      
+    for (int i = 1; i < argc; i++) {      
         //printf("%d: %s\n", i, argv[i]);
         //printf("argc: %d\n", argc);
         if (strcmp(argv[i], "--define") == 0) {
@@ -84,7 +98,6 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             
             (*variables_count)++;
 
-            free(string_parse);
         } else if (strcmp(argv[i], "--forloop") == 0) {
             variable_check_null(argv[i+1]);
             variable_check_loop(argv[i+1]); 
@@ -100,6 +113,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
             (*loops)[*loops_count].end = atof(strtok(NULL, ","));
 
             (*loops_count)++;
+
         } else if (strcmp(argv[i], "--significantfigs") == 0) {
             variable_check_null(argv[i+1]);
             variable_check_sigfig(argv[i+1]);
@@ -108,15 +122,21 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
         } else if ((i == argc - 1) && (argv[i][0] != '-') && (argv[i-1][0] != '-')) {
             (*file) = fopen(argv[i], "r");
             if ((*file) == NULL) {
+                free_variables(*variables, *variables_count);
+                free_loops(*loops, *loops_count);
                 fprintf(stderr, "uqexpr: unable to open file \"%s\" for reading\n", argv[i]);
                 exit(4);
             }
         } else if (argv[i][0] == '-' && argv[i][1] == '-') {
+            free_variables(*variables, *variables_count);
+            free_loops(*loops, *loops_count);
             fprintf(stderr, "Usage: ./uqexpr [--forloop string] [--define string] [--significantfigs 2..8] [inputfilename]\n");
             exit(11);
         } else if (strcmp(argv[i], "") == 0 || ((i != argc-1) && (argv[i][0] == '/'))) {
-             fprintf(stderr, "Usage: ./uqexpr [--forloop string] [--define string] [--significantfigs 2..8] [inputfilename]\n");
-             exit(11);                                                            
+            free_variables(*variables, *variables_count);
+            free_loops(*loops, *loops_count);
+            fprintf(stderr, "Usage: ./uqexpr [--forloop string] [--define string] [--significantfigs 2..8] [inputfilename]\n");
+            exit(11);                                                            
         }
 
     }
