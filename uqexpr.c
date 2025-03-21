@@ -40,14 +40,28 @@ void variable_check_name(char* variable_name) {
 void variable_check_define(char* variable) {
     char* string_parse = strtok(strdup(variable), "=");
     char* value = strtok(NULL, "=");
+    
+    int equals_count = 0;
+    for (size_t i = 0; i < strlen(variable); i++) {
+        if (variable[i] == '=') {
+            equals_count++;
+        }
+        if (equals_count > 1) {
+            fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
+            exit(12);
+        }
+    }
 
     if (string_parse == NULL || value == NULL) {
         fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
         exit(12);
     }
-    
+    int decimal_count = 0; 
     for (size_t i = 0; i < strlen(value); i++) {
-        if (isdigit(value[i]) == 0) {
+        if (value[i] == '.') {
+            decimal_count++;
+        }
+        if (isdigit(value[i]) == 0 && value[i] != '.') {
             fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
             exit(12);
         }
