@@ -38,10 +38,15 @@ void variable_check_name(char* variable_name) {
 }
 
 void value_check(char* value) {
-    int decimal_count = 0; 
-        for (size_t i = 0; i < strlen(value); i++) {
-            if (value[i] == '.') {
-                decimal_count++;
+    int decimal_count = 0;
+    int negative_num = 0;
+
+    if (value[0] == '-') {
+        negative_num = 1;
+    }
+    for (size_t i = negative_num; i < strlen(value); i++) {
+        if (value[i] == '.') {
+            decimal_count++;
         }
         if (isdigit(value[i]) == 0 && value[i] != '.') {
             fprintf(stderr, "uqexpr: invalid variable(s) specified on the command line\n");
@@ -272,13 +277,12 @@ int main(int argc, char** argv) {
                                                                                    
     int variables_count = 0;                                                         
     int loops_count = 0;
-    int significant_figs = 5;
-
+    int significant_figs = 4;
+    
     command_arg_check(argc, argv, &variables, &loops, &variables_count, &loops_count, &significant_figs, &file);
     
-    
 
-    fprintf(stdout, "Welcome to uqexpr.\nThis program was writted by s4808239.\n");
+    fprintf(stdout, "Welcome to uqexpr.\nThis program was written by s4808239.\n");
     
     if (variables == NULL) {
         fprintf(stdout, "There are no variables.\n");
@@ -300,10 +304,15 @@ int main(int argc, char** argv) {
     
     if (file == NULL) {
         fprintf(stdout, "Please enter your expressions and assignment operations to be evaluated.\n");
-        while (1) {
+        while (1) { 
             char* line = read_line(stdin);
-            printf("\nstdin: %s\n", line);
+            //printf("\nstdin: %s\n", line);
             
+            if (feof(stdin)) {
+                fprintf(stdout, "Thank you for using uqexpr.\n");
+                exit(0);
+            }
+ 
             if (line[0] == '#') {
                 continue;
             } else {
