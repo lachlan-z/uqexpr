@@ -327,7 +327,6 @@ int main(int argc, char** argv) {
                         fprintf(stderr, "Invalid command, expression or assignment operation\n");
                     }
                 } 
-                return 0;
             }    
         }
     } else {
