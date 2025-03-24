@@ -270,6 +270,35 @@ char** separate_line(char* string, char delim) {
     return tokens;
 }
 
+void main_handler(FILE* file, int* significant_figs) {
+    while (1) { 
+        char* line = read_line(file);
+        //printf("\nstdin: %s\n", line);
+        
+        if (feof(file)) {
+            fprintf(stdout, "Thank you for using uqexpr.\n");
+            exit(0);
+        }
+ 
+        if (line[0] == '#') {
+            continue;
+        } else {
+            char** separated_line = separate_line(line, '=');
+            if (separated_line[1] == NULL) {
+                int error_interp = 0;
+                double result = te_interp(line, &error_interp);
+
+                if (error_interp == 0) {
+                    fprintf(stdout, "Result = %.*g\n", *significant_figs, result);
+                } else {
+                    fprintf(stderr, "Invalid command, expression or assignment operation\n");
+                }
+            }
+        }    
+    }
+}
+
+
 //te_variable struct_to_te_var(Var** variables, Loop** loops, int* variables_count, int* loops_count) {
   //  te_variable 
 //}
@@ -308,35 +337,9 @@ int main(int argc, char** argv) {
     
     if (file == NULL) {
         fprintf(stdout, "Please enter your expressions and assignment operations to be evaluated.\n");
-        while (1) { 
-            char* line = read_line(stdin);
-            //printf("\nstdin: %s\n", line);
-            
-            if (feof(stdin)) {
-                fprintf(stdout, "Thank you for using uqexpr.\n");
-                exit(0);
-            }
- 
-            if (line[0] == '#') {
-                continue;
-            } else {
-                char** separated_line = separate_line(line, '=');
-                if (separated_line[1] == NULL) {
-                    int error_interp = 0;
-                    double result = te_interp(line, &error_interp);
-
-                    if (error_interp == 0) {
-                        fprintf(stdout, "Result = %.*g\n", significant_figs, result);
-                    } else {
-                        fprintf(stderr, "Invalid command, expression or assignment operation\n");
-                    }
-                } 
-            }    
-        }
+        main_handler(stdin, &significant_figs);
     } else {
-        // add code to handle when a file is inputted
-        return 0;
-
+        main_handler(file, &significant_figs);
     }
 
     return 0;
