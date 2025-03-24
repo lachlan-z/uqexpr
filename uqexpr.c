@@ -10,7 +10,8 @@ typedef struct {
 } Var;
 
 typedef struct {                                                                 
-    char* name;                                                                  
+    char* name;
+    double value;
     double start;                                                                
     double increment;                                                            
     double end;                                                                  
@@ -154,8 +155,11 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops, int
  
             (*loops)[*loops_count].name = malloc(strlen(string_parse) + 1);
             strcpy((*loops)[*loops_count].name, string_parse);
- 
-            (*loops)[*loops_count].start = atof(strtok(NULL, ","));
+            
+            double value_start = atof(strtok(NULL, ","));
+
+            (*loops)[*loops_count].value = value_start;
+            (*loops)[*loops_count].start = value_start;
             (*loops)[*loops_count].increment = atof(strtok(NULL, ","));
             (*loops)[*loops_count].end = atof(strtok(NULL, ","));
 
