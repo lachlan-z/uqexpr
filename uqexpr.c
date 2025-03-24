@@ -46,6 +46,20 @@ void variable_check_name(char* variable_name)
     }
 }
 
+void variable_check_name_op(char* variable_name)
+{
+    if (!((size_t)1 <= strlen(variable_name)
+                && strlen(variable_name) <= (size_t)25)) {
+        fprintf(stderr, "Invalid command, expression or assignment operation\n");
+    }
+
+    for (size_t l = 0; l < strlen(variable_name); l++) {
+        if (isalpha(variable_name[l]) == 0) {
+            fprintf(stderr, "Invalid command, expression or assignment operation\n");
+        }
+    }
+}
+
 void value_check(char* value)
 {
     int decimal_count = 0;
@@ -359,18 +373,50 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
             char** separated_line = separate_line(line, '=');
 
             if (separated_line[1] == NULL) {
-                int error_interp = 0;
+                int error_compile = 0;
  
                 te_variable* vars = struct_to_te_var(variables, loops, variables_count, loops_count);
-                te_expr* expr = te_compile(line, vars, (*variables_count)+(*loops_count), &error_interp);
+                te_expr* expr = te_compile(line, vars, (*variables_count)+(*loops_count), &error_compile);
                 double result = te_eval(expr);
-                if (error_interp == 0) {
+                if (error_compile == 0) {
                     fprintf(stdout, "Result = %.*g\n", *significant_figs,
                             result);
                 } else {
                     fprintf(stderr,
                             "Invalid command, expression or assignment "
                             "operation\n");
+                }
+            } else {
+                char* lhs = separated_line[0];
+                char* rhs = separated_line[1];
+                int error_compile = 0;
+
+                variable_check_name_op(lhs);
+                
+                te_variable* vars = struct_to_te_var(variables, loops, variables_count, loops_count);
+                te_expr* expr = te_compile(rhs, vars, (*variables_count)+(*loops_count), &error_compile);
+                
+                if (error_compile != 0) {
+                    fprintf(stderr,
+                            "Invalid command, expression or assignment "
+                            "operation\n");
+                } else {
+                    *variables
+                        = realloc(*variables, sizeof(Var) * (*variables_count + 1));
+
+                    (*variables)[*variables_count].name
+                        = malloc(strlen(lhs) + 1);
+                    strcpy((*variables)[*variables_count].name, lhs);
+
+                    double result = te_eval(expr);
+
+                    (*variables)[*variables_count].value = result;
+
+                    (*variables_count)++;
+
+                    fprintf(stdout, "%s = %.*g\n", lhs, *significant_figs,
+                            result);
+
                 }
             }
         }
