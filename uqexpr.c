@@ -352,10 +352,10 @@ te_variable* struct_to_te_var(Var** variables, Loop** loops, int* variables_coun
     }
 
     for (int i = 0; i < loop_count_checked; i++) {
-        result[i + total].name = (*loops)[i].name;
-        result[i + total].address = &((*loops)[i].value);
+        result[var_count_checked + i].name = (*loops)[i].name;
+        result[var_count_checked + i].address = &((*loops)[i].value);
     }
-
+    
     return result;
     
 }
@@ -372,6 +372,8 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
         }
         if (line[0] == '#') {
             continue;
+        } else if (strcmp(line, "@print") == 0) {
+            printf("PRINT ENTERED");
         } else {
             char** separated_line = separate_line(line, '=');
 
@@ -379,6 +381,7 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                 int error_compile = 0;
                 
                 te_variable* vars = struct_to_te_var(variables, loops, variables_count, loops_count);
+
                 te_expr* expr = te_compile(line, vars, (*variables_count)+(*loops_count), &error_compile);
                 double result = te_eval(expr);
                 if (error_compile == 0) {
