@@ -373,7 +373,27 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
         if (line[0] == '#') {
             continue;
         } else if (strcmp(line, "@print") == 0) {
-            printf("PRINT ENTERED");
+            if (*variables == NULL) {
+                fprintf(stdout, "There are no variables.\n");
+            } else {
+                fprintf(stdout, "Variables:\n");
+                for (int i = 0; i < (*variables_count); i++) {
+                    fprintf(stdout, "%s = %.*g\n", (*variables)[i].name, *significant_figs,
+                        (*variables)[i].value);
+                }
+            }
+
+            if (*loops == NULL) {
+                fprintf(stdout, "There are no loop variables.\n");
+            } else {
+                fprintf(stdout, "Loop variables:\n");
+                for (int i = 0; i < (*loops_count); i++) {
+                    fprintf(stdout, "%s = %.*g (%.*g, %.*g, %.*g)\n", (*loops)[i].name,
+                        *significant_figs, (*loops)[i].value, *significant_figs,
+                        (*loops)[i].start, *significant_figs, (*loops)[i].increment,
+                        *significant_figs, (*loops)[i].end);
+                }
+            }
         } else {
             char** separated_line = separate_line(line, '=');
 
@@ -425,6 +445,15 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                         if (strcmp((*variables)[i].name, trimmed_lhs) == 0) {
                             result = te_eval(expr);
                             (*variables)[i].value = result;
+                            var_exists = 1;
+                            break;
+                        }
+                    }
+
+                    for (int i = 0; i < (*loops_count); i++) {
+                        if (strcmp((*loops)[i].name, trimmed_lhs) == 0) {
+                            result = te_eval(expr);
+                            (*loops)[i].value = result;
                             var_exists = 1;
                             break;
                         }
@@ -485,7 +514,7 @@ int main(int argc, char** argv)
         fprintf(stdout, "Loop variables:\n");
         for (int i = 0; i < loops_count; i++) {
             fprintf(stdout, "%s = %.*g (%.*g, %.*g, %.*g)\n", loops[i].name,
-                    significant_figs, loops[i].start, significant_figs,
+                    significant_figs, loops[i].value, significant_figs,
                     loops[i].start, significant_figs, loops[i].increment,
                     significant_figs, loops[i].end);
         }
