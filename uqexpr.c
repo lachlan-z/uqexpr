@@ -46,18 +46,21 @@ void variable_check_name(char* variable_name)
     }
 }
 
-void variable_check_name_op(char* variable_name)
+int variable_check_name_op(char* variable_name)
 {
     if (!((size_t)1 <= strlen(variable_name)
                 && strlen(variable_name) <= (size_t)25)) {
         fprintf(stderr, "Invalid command, expression or assignment operation\n");
+        return 1;
     }
 
     for (size_t l = 0; l < strlen(variable_name); l++) {
         if (isalpha(variable_name[l]) == 0) {
             fprintf(stderr, "Invalid command, expression or assignment operation\n");
+            return 1;
         }
     }
+    return 0;
 }
 
 void value_check(char* value)
@@ -374,7 +377,7 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
 
             if (separated_line[1] == NULL) {
                 int error_compile = 0;
- 
+                
                 te_variable* vars = struct_to_te_var(variables, loops, variables_count, loops_count);
                 te_expr* expr = te_compile(line, vars, (*variables_count)+(*loops_count), &error_compile);
                 double result = te_eval(expr);
@@ -390,7 +393,7 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                 char* lhs = separated_line[0];
                 char* rhs = separated_line[1];
                 int error_compile = 0;
-                
+
                 char* trimmed_lhs = malloc(strlen(lhs) + 1);
                 for (size_t i = 0; i < strlen(lhs); i++) {
                     if (!isspace(lhs[i])) {
@@ -399,7 +402,11 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                         trimmed_lhs[length + 1] = '\0';
                     }
                 }
-                variable_check_name_op(trimmed_lhs);
+                int check = variable_check_name_op(trimmed_lhs);
+                 
+                if (check == 1) {
+                    continue;
+                }
                 
                 te_variable* vars = struct_to_te_var(variables, loops, variables_count, loops_count);
                 te_expr* expr = te_compile(rhs, vars, (*variables_count)+(*loops_count), &error_compile);
@@ -426,7 +433,7 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
 
                         (*variables)[*variables_count].name
                             = malloc(strlen(trimmed_lhs) + 1);
-                        strcpy((*variables)[*variables_count].name, lhs);
+                        strcpy((*variables)[*variables_count].name, trimmed_lhs);
               
                         result = te_eval(expr);
 
