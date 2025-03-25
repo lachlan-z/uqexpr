@@ -216,7 +216,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
             variable_check_null(argv[i + 1]);
             variable_check_sigfig(argv[i + 1]);
 
-            (*significant_figs) = atoi(argv[i + 1]) + 1;
+            (*significant_figs) = atoi(argv[i + 1]);
         } else if ((i == argc - 1) && (argv[i][0] != '-')
                 && (argv[i - 1][0] != '-') && (strcmp(argv[i], "") != 0)) {
             (*file) = fopen(argv[i], "r");
