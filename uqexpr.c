@@ -390,8 +390,16 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                 char* lhs = separated_line[0];
                 char* rhs = separated_line[1];
                 int error_compile = 0;
-
-                variable_check_name_op(lhs);
+                
+                char* trimmed_lhs = malloc(strlen(lhs) + 1);
+                for (size_t i = 0; i < strlen(lhs); i++) {
+                    if (!isspace(lhs[i])) {
+                        size_t length = strlen(trimmed_lhs);
+                        trimmed_lhs[length] = lhs[i];
+                        trimmed_lhs[length + 1] = '\0';
+                    }
+                }
+                variable_check_name_op(trimmed_lhs);
                 
                 te_variable* vars = struct_to_te_var(variables, loops, variables_count, loops_count);
                 te_expr* expr = te_compile(rhs, vars, (*variables_count)+(*loops_count), &error_compile);
@@ -401,22 +409,34 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                             "Invalid command, expression or assignment "
                             "operation\n");
                 } else {
-                    *variables
-                        = realloc(*variables, sizeof(Var) * (*variables_count + 1));
+                    double result = 0;
+                    int var_exists = 0;
+                    for (int i = 0; i < (*variables_count); i++) {
+                        if (strcmp((*variables)[i].name, trimmed_lhs) == 0) {
+                            result = te_eval(expr);
+                            (*variables)[i].value = result;
+                            var_exists = 1;
+                            break;
+                        }
+                    }
 
-                    (*variables)[*variables_count].name
-                        = malloc(strlen(lhs) + 1);
-                    strcpy((*variables)[*variables_count].name, lhs);
+                    if (!var_exists) {
+                        *variables
+                            = realloc(*variables, sizeof(Var) * (*variables_count + 1));
 
-                    double result = te_eval(expr);
+                        (*variables)[*variables_count].name
+                            = malloc(strlen(trimmed_lhs) + 1);
+                        strcpy((*variables)[*variables_count].name, lhs);
+              
+                        result = te_eval(expr);
 
-                    (*variables)[*variables_count].value = result;
+                        (*variables)[*variables_count].value = result;
 
-                    (*variables_count)++;
+                        (*variables_count)++;
+                    }
 
-                    fprintf(stdout, "%s = %.*g\n", lhs, *significant_figs,
+                    fprintf(stdout, "%s = %.*g\n", trimmed_lhs, *significant_figs,
                             result);
-
                 }
             }
         }
