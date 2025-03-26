@@ -27,17 +27,17 @@ void variable_check_null(char* variable)
     }
 }
 
-void variable_check_name(char* variable_name)
+void variable_check_name(char* variableName)
 {
-    if (!((size_t)1 <= strlen(variable_name)
-                && strlen(variable_name) <= (size_t)25)) {
+    if (!((size_t)1 <= strlen(variableName)
+                && strlen(variableName) <= (size_t)25)) {
         fprintf(stderr,
                 "uqexpr: invalid variable(s) specified on the command line\n");
         exit(12);
     }
 
-    for (size_t l = 0; l < strlen(variable_name); l++) {
-        if (isalpha(variable_name[l]) == 0) {
+    for (size_t l = 0; l < strlen(variableName); l++) {
+        if (isalpha(variableName[l]) == 0) {
             fprintf(stderr,
                     "uqexpr: invalid variable(s) specified on the command "
                     "line\n");
@@ -46,17 +46,17 @@ void variable_check_name(char* variable_name)
     }
 }
 
-int variable_check_name_op(char* variable_name)
+int variable_check_name_op(char* variableName)
 {
-    if (!((size_t)1 <= strlen(variable_name)
-                && strlen(variable_name) <= (size_t)25)) {
+    if (!((size_t)1 <= strlen(variableName)
+                && strlen(variableName) <= (size_t)25)) {
         fprintf(stderr,
                 "Invalid command, expression or assignment operation\n");
         return 1;
     }
 
-    for (size_t l = 0; l < strlen(variable_name); l++) {
-        if (isalpha(variable_name[l]) == 0) {
+    for (size_t l = 0; l < strlen(variableName); l++) {
+        if (isalpha(variableName[l]) == 0) {
             fprintf(stderr,
                     "Invalid command, expression or assignment operation\n");
             return 1;
@@ -67,7 +67,7 @@ int variable_check_name_op(char* variable_name)
 
 void value_check(char* value)
 {
-    int decimal_count = 0;
+    int decimalCount = 0;
     int negative_num = 0;
 
     if (value[0] == '-') {
@@ -75,7 +75,7 @@ void value_check(char* value)
     }
     for (size_t i = negative_num; i < strlen(value); i++) {
         if (value[i] == '.') {
-            decimal_count++;
+            decimalCount++;
         }
         if (isdigit(value[i]) == 0 && value[i] != '.') {
             fprintf(stderr,
@@ -88,7 +88,7 @@ void value_check(char* value)
 
 void variable_check_define(char* variable)
 {
-    char* string_parse = strtok(strdup(variable), "=");
+    char* stringParse = strtok(strdup(variable), "=");
     char* value = strtok(NULL, "=");
 
     int equals_count = 0;
@@ -104,26 +104,26 @@ void variable_check_define(char* variable)
         }
     }
 
-    if (string_parse == NULL || value == NULL) {
+    if (stringParse == NULL || value == NULL) {
         fprintf(stderr,
                 "uqexpr: invalid variable(s) specified on the command line\n");
         exit(12);
     }
 
     value_check(value);
-    variable_check_name(string_parse);
-    free(string_parse);
+    variable_check_name(stringParse);
+    free(stringParse);
 }
 
 void variable_check_loop(char* variable)
 {
-    char* string_parse = strtok(strdup(variable), ",");
-    variable_check_name(string_parse);
+    char* stringParse = strtok(strdup(variable), ",");
+    variable_check_name(stringParse);
 
     char* start = strtok(NULL, ",");
     char* increment = strtok(NULL, ",");
     char* end = strtok(NULL, ",");
-    if (string_parse == NULL || start == NULL || increment == NULL
+    if (stringParse == NULL || start == NULL || increment == NULL
             || end == NULL) {
         fprintf(stderr,
                 "uqexpr: invalid variable(s) specified on the command line\n");
@@ -164,13 +164,13 @@ int loop_check_op(char* variable)
         return 1;
     }
 
-    char* string_parse = strtok(strdup(variable), ",");
-    variable_check_name(string_parse);
+    char* stringParse = strtok(strdup(variable), ",");
+    variable_check_name(stringParse);
 
     char* start = strtok(NULL, ",");
     char* increment = strtok(NULL, ",");
     char* end = strtok(NULL, ",");
-    if (string_parse == NULL || start == NULL || increment == NULL
+    if (stringParse == NULL || start == NULL || increment == NULL
             || end == NULL) {
         fprintf(stderr,
                 "Invalid command, expression or assignment operation\n");
@@ -220,14 +220,14 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
         if (strcmp(argv[i], "--define") == 0) {
             variable_check_null(argv[i + 1]);
             variable_check_define(argv[i + 1]);
-            char* string_parse = strtok(argv[i + 1], "=");
+            char* stringParse = strtok(argv[i + 1], "=");
 
             *variables
                     = realloc(*variables, sizeof(Var) * (*variables_count + 1));
 
             (*variables)[*variables_count].name
-                    = malloc(strlen(string_parse) + 1);
-            strcpy((*variables)[*variables_count].name, string_parse);
+                    = malloc(strlen(stringParse) + 1);
+            strcpy((*variables)[*variables_count].name, stringParse);
 
             (*variables)[*variables_count].value = atof(strtok(NULL, "="));
 
@@ -236,12 +236,12 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
         } else if (strcmp(argv[i], "--forloop") == 0) {
             variable_check_null(argv[i + 1]);
             variable_check_loop(argv[i + 1]);
-            char* string_parse = strtok(argv[i + 1], ",");
+            char* stringParse = strtok(argv[i + 1], ",");
 
             *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));
 
-            (*loops)[*loops_count].name = malloc(strlen(string_parse) + 1);
-            strcpy((*loops)[*loops_count].name, string_parse);
+            (*loops)[*loops_count].name = malloc(strlen(stringParse) + 1);
+            strcpy((*loops)[*loops_count].name, stringParse);
 
             double value_start = atof(strtok(NULL, ","));
 
@@ -455,14 +455,14 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
             if (check == 1) {
                 continue;
             }
-            char* string_parse = strtok(loop_var, ",");
+            char* stringParse = strtok(loop_var, ",");
             double value_start = atof(strtok(NULL, ","));
             double value_increment = atof(strtok(NULL, ","));
             double value_end = atof(strtok(NULL, ","));
 
             int var_exists = 0;
             for (int i = 0; i < (*variables_count); i++) {
-                if (strcmp((*variables)[i].name, string_parse) == 0) {
+                if (strcmp((*variables)[i].name, stringParse) == 0) {
                     free((*variables)[i].name);
 
                     for (int l = i; l < (*variables_count) - 1; l++) {
@@ -478,7 +478,7 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
             }
 
             for (int i = 0; i < (*loops_count); i++) {
-                if (strcmp((*loops)[i].name, string_parse) == 0) {
+                if (strcmp((*loops)[i].name, stringParse) == 0) {
                     (*loops)[i].value = value_start;
                     (*loops)[i].start = value_start;
                     (*loops)[i].increment = value_increment;
@@ -491,8 +491,8 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
             if (!var_exists) {
                 *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));
 
-                (*loops)[*loops_count].name = malloc(strlen(string_parse) + 1);
-                strcpy((*loops)[*loops_count].name, string_parse);
+                (*loops)[*loops_count].name = malloc(strlen(stringParse) + 1);
+                strcpy((*loops)[*loops_count].name, stringParse);
                 (*loops)[*loops_count].value = value_start;
                 (*loops)[*loops_count].start = value_start;
                 (*loops)[*loops_count].increment = value_increment;
