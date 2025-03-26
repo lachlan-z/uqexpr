@@ -4,6 +4,17 @@
 #include <ctype.h>
 #include <tinyexpr.h>
 
+#define INVALID_VAR 12
+#define USAGE_ERR 11
+#define INVALID_FILE 4
+#define DUPLICATE_VAR 5
+#define MAX_VAR_LEN 25
+#define MIN_VAR_LEN 1
+#define MAX_SIGFIG 8
+#define MIN_SIGFIG 2
+#define DEFAULT_SIGFIG 4
+#define RANGE_LEN 6
+
 typedef struct {
     char* name;
     double value;
@@ -17,23 +28,23 @@ typedef struct {
     double end;
 } Loop;
 
-void variable_check_null(char* variable)
+void variable_check_null(const char* variable)
 {
     if (variable == NULL) {
         fprintf(stderr,
                 "Usage: ./uqexpr [--forloop string] [--define string] "
                 "[--significantfigs 2..8] [inputfilename]\n");
-        exit(11);
+        exit(USAGE_ERR);
     }
 }
 
 void variable_check_name(char* variableName)
 {
-    if (!((size_t)1 <= strlen(variableName)
-                && strlen(variableName) <= (size_t)25)) {
+    if (!((size_t)MIN_VAR_LEN <= strlen(variableName)
+                && strlen(variableName) <= (size_t)MAX_VAR_LEN)) {
         fprintf(stderr,
                 "uqexpr: invalid variable(s) specified on the command line\n");
-        exit(12);
+        exit(INVALID_VAR);
     }
 
     for (size_t l = 0; l < strlen(variableName); l++) {
@@ -41,15 +52,15 @@ void variable_check_name(char* variableName)
             fprintf(stderr,
                     "uqexpr: invalid variable(s) specified on the command "
                     "line\n");
-            exit(12);
+            exit(INVALID_VAR);
         }
     }
 }
 
 int variable_check_name_op(char* variableName)
 {
-    if (!((size_t)1 <= strlen(variableName)
-                && strlen(variableName) <= (size_t)25)) {
+    if (!((size_t)MIN_VAR_LEN <= strlen(variableName)
+                && strlen(variableName) <= (size_t)MAX_VAR_LEN)) {
         fprintf(stderr,
                 "Invalid command, expression or assignment operation\n");
         return 1;
@@ -81,7 +92,7 @@ void value_check(char* value)
             fprintf(stderr,
                     "uqexpr: invalid variable(s) specified on the command "
                     "line\n");
-            exit(12);
+            exit(INVALID_VAR);
         }
     }
 }
@@ -100,14 +111,14 @@ void variable_check_define(char* variable)
             fprintf(stderr,
                     "uqexpr: invalid variable(s) specified on the command "
                     "line\n");
-            exit(12);
+            exit(INVALID_VAR);
         }
     }
 
     if (stringParse == NULL || value == NULL) {
         fprintf(stderr,
                 "uqexpr: invalid variable(s) specified on the command line\n");
-        exit(12);
+        exit(INVALID_VAR);
     }
 
     value_check(value);
@@ -127,7 +138,7 @@ void variable_check_loop(char* variable)
             || end == NULL) {
         fprintf(stderr,
                 "uqexpr: invalid variable(s) specified on the command line\n");
-        exit(12);
+        exit(INVALID_VAR);
     }
 
     value_check(start);
@@ -142,17 +153,18 @@ void variable_check_loop(char* variable)
             || ((startD > endD) && (incrementD > 0))) {
         fprintf(stderr,
                 "uqexpr: invalid variable(s) specified on the command line\n");
-        exit(12);
+        exit(INVALID_VAR);
     }
 }
 
 void variable_check_sigfig(char* variable)
 {
-    if ((variable[0] == '0') || (atof(variable) < 2) || (atof(variable) > 8)) {
+    if ((variable[0] == '0') || (atof(variable) < MIN_SIGFIG)
+            || (atof(variable) > MAX_SIGFIG)) {
         fprintf(stderr,
                 "Usage: ./uqexpr [--forloop string] [--define string] "
                 "[--significantfigs 2..8] [inputfilename]\n");
-        exit(11);
+        exit(USAGE_ERR);
     }
 }
 
@@ -211,8 +223,7 @@ void free_loops(Loop* loops, int loopsCount)
 }
 
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
-        int* variablesCount, int* loopsCount, int* significantFigs,
-        FILE** file)
+        int* variablesCount, int* loopsCount, int* significantFigs, FILE** file)
 {
     for (int i = 1; i < argc; i++) {
         // printf("%d: %s\n", i, argv[i]);
@@ -266,7 +277,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
                 fprintf(stderr,
                         "uqexpr: unable to open file \"%s\" for reading\n",
                         argv[i]);
-                exit(4);
+                exit(INVALID_FILE);
             }
         } else if (argv[i][0] == '-' && argv[i][1] == '-') {
             free_variables(*variables, *variablesCount);
@@ -274,7 +285,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
             fprintf(stderr,
                     "Usage: ./uqexpr [--forloop string] [--define string] "
                     "[--significantfigs 2..8] [inputfilename]\n");
-            exit(11);
+            exit(USAGE_ERR);
         } else if (strcmp(argv[i], "") == 0
                 || ((i != argc - 1) && (argv[i][0] == '/'))) {
             free_variables(*variables, *variablesCount);
@@ -282,7 +293,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
             fprintf(stderr,
                     "Usage: ./uqexpr [--forloop string] [--define string] "
                     "[--significantfigs 2..8] [inputfilename]\n");
-            exit(11);
+            exit(USAGE_ERR);
         }
     }
     // ee
@@ -290,7 +301,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
         for (int l = 0; l < *loopsCount; l++) {
             if ((i != l) && (strcmp((*loops)[i].name, (*loops)[l].name) == 0)) {
                 fprintf(stderr, "uqexpr: duplicate variables were detected\n");
-                exit(5);
+                exit(DUPLICATE_VAR);
             }
         }
     }
@@ -301,7 +312,7 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
                     && (strcmp((*variables)[i].name, (*variables)[l].name)
                             == 0)) {
                 fprintf(stderr, "uqexpr: duplicate variables were detected\n");
-                exit(5);
+                exit(DUPLICATE_VAR);
             }
         }
     }
@@ -349,7 +360,7 @@ char* read_line(FILE* stream)
  **/
 char** separate_line(char* string, char delim)
 {
-    char** tokens = malloc(sizeof(char*));
+    char** tokens = (char**)malloc(sizeof(char*));
     tokens[0] = NULL;
 
     char delimiters[] = {delim, '\0'};
@@ -360,7 +371,8 @@ char** separate_line(char* string, char delim)
     while (token) {
         tokens[numTokens] = strdup(token);
         numTokens++;
-        tokens = realloc(tokens, sizeof(char*) * (numTokens + 1));
+        tokens = (char**)realloc(
+                (void*)tokens, sizeof(char*) * (numTokens + 1));
         tokens[numTokens] = NULL;
 
         token = strtok(NULL, delimiters);
@@ -369,8 +381,8 @@ char** separate_line(char* string, char delim)
     return tokens;
 }
 
-te_variable* struct_to_te_var(
-        Var** variables, Loop** loops, int* variablesCount, int* loopsCount)
+te_variable* struct_to_te_var(Var** variables, Loop** loops,
+        const int* variablesCount, const int* loopsCount)
 {
     int varCountChecked;
     if (variablesCount != NULL) {
@@ -401,13 +413,11 @@ te_variable* struct_to_te_var(
     return result;
 }
 
-void main_handler(FILE* file, int* significantFigs, Var** variables,
+void main_handler(FILE* file, const int* significantFigs, Var** variables,
         int* variablesCount, Loop** loops, int* loopsCount)
 {
     while (1) {
         char* line = read_line(file);
-        // printf("\nstdin: %s\n", line);
-
         if (feof(file)) {
             fprintf(stdout, "Thank you for using uqexpr.\n");
             exit(0);
@@ -415,7 +425,9 @@ void main_handler(FILE* file, int* significantFigs, Var** variables,
 
         if (line[0] == '#') {
             continue;
-        } else if (strcmp(line, "@print") == 0) {
+        }
+
+        if (strcmp(line, "@print") == 0) {
             if (*variables == NULL) {
                 fprintf(stdout, "There are no variables.\n");
             } else {
@@ -440,7 +452,7 @@ void main_handler(FILE* file, int* significantFigs, Var** variables,
                 }
             }
         } else if (strcmp(strtok(strdup(line), " "), "@range") == 0) {
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < RANGE_LEN; i++) {
                 if (line[i] == ' '
                         || (line[i + 1] == ' ' && line[i + 2] == ' ')) {
                     fprintf(stderr,
@@ -575,8 +587,7 @@ void main_handler(FILE* file, int* significantFigs, Var** variables,
 
                         (*variables)[*variablesCount].name
                                 = malloc(strlen(trimmedLhs) + 1);
-                        strcpy((*variables)[*variablesCount].name,
-                                trimmedLhs);
+                        strcpy((*variables)[*variablesCount].name, trimmedLhs);
 
                         result = te_eval(expr);
 
@@ -585,8 +596,8 @@ void main_handler(FILE* file, int* significantFigs, Var** variables,
                         (*variablesCount)++;
                     }
 
-                    fprintf(stdout, "%s = %.*g\n", trimmedLhs,
-                            *significantFigs, result);
+                    fprintf(stdout, "%s = %.*g\n", trimmedLhs, *significantFigs,
+                            result);
                 }
             }
         }
@@ -601,7 +612,7 @@ int main(int argc, char** argv)
 
     int variablesCount = 0;
     int loopsCount = 0;
-    int significantFigs = 4;
+    int significantFigs = DEFAULT_SIGFIG;
 
     command_arg_check(argc, argv, &variables, &loops, &variablesCount,
             &loopsCount, &significantFigs, &file);
