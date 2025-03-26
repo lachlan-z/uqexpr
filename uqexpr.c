@@ -68,12 +68,12 @@ int variable_check_name_op(char* variableName)
 void value_check(char* value)
 {
     int decimalCount = 0;
-    int negative_num = 0;
+    int negativeNum = 0;
 
     if (value[0] == '-') {
-        negative_num = 1;
+        negativeNum = 1;
     }
-    for (size_t i = negative_num; i < strlen(value); i++) {
+    for (size_t i = negativeNum; i < strlen(value); i++) {
         if (value[i] == '.') {
             decimalCount++;
         }
@@ -91,12 +91,12 @@ void variable_check_define(char* variable)
     char* stringParse = strtok(strdup(variable), "=");
     char* value = strtok(NULL, "=");
 
-    int equals_count = 0;
+    int equalCount = 0;
     for (size_t i = 0; i < strlen(variable); i++) {
         if (variable[i] == '=') {
-            equals_count++;
+            equalCount++;
         }
-        if (equals_count > 1) {
+        if (equalCount > 1) {
             fprintf(stderr,
                     "uqexpr: invalid variable(s) specified on the command "
                     "line\n");
@@ -134,12 +134,12 @@ void variable_check_loop(char* variable)
     value_check(increment);
     value_check(end);
 
-    double start_d = atof(start);
-    double increment_d = atof(increment);
-    double end_d = atof(end);
+    double startD = atof(start);
+    double incrementD = atof(increment);
+    double endD = atof(end);
 
-    if ((increment_d == 0) || ((start_d < end_d) && (increment_d < 0))
-            || ((start_d > end_d) && (increment_d > 0))) {
+    if ((incrementD == 0) || ((startD < endD) && (incrementD < 0))
+            || ((startD > endD) && (incrementD > 0))) {
         fprintf(stderr,
                 "uqexpr: invalid variable(s) specified on the command line\n");
         exit(12);
@@ -181,12 +181,12 @@ int loop_check_op(char* variable)
     value_check(increment);
     value_check(end);
 
-    double start_d = atof(start);
-    double increment_d = atof(increment);
-    double end_d = atof(end);
+    double startD = atof(start);
+    double incrementD = atof(increment);
+    double endD = atof(end);
 
-    if ((increment_d == 0) || ((start_d < end_d) && (increment_d < 0))
-            || ((start_d > end_d) && (increment_d > 0))) {
+    if ((incrementD == 0) || ((startD < endD) && (incrementD < 0))
+            || ((startD > endD) && (incrementD > 0))) {
         fprintf(stderr,
                 "Invalid command, expression or assignment operation\n");
         return 1;
@@ -194,24 +194,24 @@ int loop_check_op(char* variable)
     return 0;
 }
 
-void free_variables(Var* variables, int variables_count)
+void free_variables(Var* variables, int variablesCount)
 {
-    for (int i = 0; i < variables_count; i++) {
+    for (int i = 0; i < variablesCount; i++) {
         free(variables[i].name);
     }
     free(variables);
 }
 
-void free_loops(Loop* loops, int loops_count)
+void free_loops(Loop* loops, int loopsCount)
 {
-    for (int i = 0; i < loops_count; i++) {
+    for (int i = 0; i < loopsCount; i++) {
         free(loops[i].name);
     }
     free(loops);
 }
 
 void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
-        int* variables_count, int* loops_count, int* significant_figs,
+        int* variablesCount, int* loopsCount, int* significantFigs,
         FILE** file)
 {
     for (int i = 1; i < argc; i++) {
@@ -223,62 +223,62 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
             char* stringParse = strtok(argv[i + 1], "=");
 
             *variables
-                    = realloc(*variables, sizeof(Var) * (*variables_count + 1));
+                    = realloc(*variables, sizeof(Var) * (*variablesCount + 1));
 
-            (*variables)[*variables_count].name
+            (*variables)[*variablesCount].name
                     = malloc(strlen(stringParse) + 1);
-            strcpy((*variables)[*variables_count].name, stringParse);
+            strcpy((*variables)[*variablesCount].name, stringParse);
 
-            (*variables)[*variables_count].value = atof(strtok(NULL, "="));
+            (*variables)[*variablesCount].value = atof(strtok(NULL, "="));
 
-            (*variables_count)++;
+            (*variablesCount)++;
 
         } else if (strcmp(argv[i], "--forloop") == 0) {
             variable_check_null(argv[i + 1]);
             variable_check_loop(argv[i + 1]);
             char* stringParse = strtok(argv[i + 1], ",");
 
-            *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));
+            *loops = realloc(*loops, sizeof(Loop) * (*loopsCount + 1));
 
-            (*loops)[*loops_count].name = malloc(strlen(stringParse) + 1);
-            strcpy((*loops)[*loops_count].name, stringParse);
+            (*loops)[*loopsCount].name = malloc(strlen(stringParse) + 1);
+            strcpy((*loops)[*loopsCount].name, stringParse);
 
-            double value_start = atof(strtok(NULL, ","));
+            double valueStart = atof(strtok(NULL, ","));
 
-            (*loops)[*loops_count].value = value_start;
-            (*loops)[*loops_count].start = value_start;
-            (*loops)[*loops_count].increment = atof(strtok(NULL, ","));
-            (*loops)[*loops_count].end = atof(strtok(NULL, ","));
+            (*loops)[*loopsCount].value = valueStart;
+            (*loops)[*loopsCount].start = valueStart;
+            (*loops)[*loopsCount].increment = atof(strtok(NULL, ","));
+            (*loops)[*loopsCount].end = atof(strtok(NULL, ","));
 
-            (*loops_count)++;
+            (*loopsCount)++;
 
         } else if (strcmp(argv[i], "--significantfigs") == 0) {
             variable_check_null(argv[i + 1]);
             variable_check_sigfig(argv[i + 1]);
 
-            (*significant_figs) = atoi(argv[i + 1]);
+            (*significantFigs) = atoi(argv[i + 1]);
         } else if ((i == argc - 1) && (argv[i][0] != '-')
                 && (argv[i - 1][0] != '-') && (strcmp(argv[i], "") != 0)) {
             (*file) = fopen(argv[i], "r");
             if ((*file) == NULL) {
-                free_variables(*variables, *variables_count);
-                free_loops(*loops, *loops_count);
+                free_variables(*variables, *variablesCount);
+                free_loops(*loops, *loopsCount);
                 fprintf(stderr,
                         "uqexpr: unable to open file \"%s\" for reading\n",
                         argv[i]);
                 exit(4);
             }
         } else if (argv[i][0] == '-' && argv[i][1] == '-') {
-            free_variables(*variables, *variables_count);
-            free_loops(*loops, *loops_count);
+            free_variables(*variables, *variablesCount);
+            free_loops(*loops, *loopsCount);
             fprintf(stderr,
                     "Usage: ./uqexpr [--forloop string] [--define string] "
                     "[--significantfigs 2..8] [inputfilename]\n");
             exit(11);
         } else if (strcmp(argv[i], "") == 0
                 || ((i != argc - 1) && (argv[i][0] == '/'))) {
-            free_variables(*variables, *variables_count);
-            free_loops(*loops, *loops_count);
+            free_variables(*variables, *variablesCount);
+            free_loops(*loops, *loopsCount);
             fprintf(stderr,
                     "Usage: ./uqexpr [--forloop string] [--define string] "
                     "[--significantfigs 2..8] [inputfilename]\n");
@@ -286,8 +286,8 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
         }
     }
     // ee
-    for (int i = 0; i < *loops_count; i++) {
-        for (int l = 0; l < *loops_count; l++) {
+    for (int i = 0; i < *loopsCount; i++) {
+        for (int l = 0; l < *loopsCount; l++) {
             if ((i != l) && (strcmp((*loops)[i].name, (*loops)[l].name) == 0)) {
                 fprintf(stderr, "uqexpr: duplicate variables were detected\n");
                 exit(5);
@@ -295,8 +295,8 @@ void command_arg_check(int argc, char** argv, Var** variables, Loop** loops,
         }
     }
 
-    for (int i = 0; i < *variables_count; i++) {
-        for (int l = 0; l < *variables_count; l++) {
+    for (int i = 0; i < *variablesCount; i++) {
+        for (int l = 0; l < *variablesCount; l++) {
             if ((i != l)
                     && (strcmp((*variables)[i].name, (*variables)[l].name)
                             == 0)) {
@@ -370,39 +370,39 @@ char** separate_line(char* string, char delim)
 }
 
 te_variable* struct_to_te_var(
-        Var** variables, Loop** loops, int* variables_count, int* loops_count)
+        Var** variables, Loop** loops, int* variablesCount, int* loopsCount)
 {
-    int var_count_checked;
-    if (variables_count != NULL) {
-        var_count_checked = (*variables_count);
+    int varCountChecked;
+    if (variablesCount != NULL) {
+        varCountChecked = (*variablesCount);
     } else {
-        var_count_checked = 0;
+        varCountChecked = 0;
     }
 
-    int loop_count_checked;
-    if (loops_count != NULL) {
-        loop_count_checked = (*loops_count);
+    int loopCountChecked;
+    if (loopsCount != NULL) {
+        loopCountChecked = (*loopsCount);
     } else {
-        loop_count_checked = 0;
+        loopCountChecked = 0;
     }
 
-    int total = var_count_checked + loop_count_checked;
+    int total = varCountChecked + loopCountChecked;
     te_variable* result = (te_variable*)malloc(sizeof(te_variable) * (total));
-    for (int i = 0; i < var_count_checked; i++) {
+    for (int i = 0; i < varCountChecked; i++) {
         result[i].name = (*variables)[i].name;
         result[i].address = &((*variables)[i].value);
     }
 
-    for (int i = 0; i < loop_count_checked; i++) {
-        result[var_count_checked + i].name = (*loops)[i].name;
-        result[var_count_checked + i].address = &((*loops)[i].value);
+    for (int i = 0; i < loopCountChecked; i++) {
+        result[varCountChecked + i].name = (*loops)[i].name;
+        result[varCountChecked + i].address = &((*loops)[i].value);
     }
 
     return result;
 }
 
-void main_handler(FILE* file, int* significant_figs, Var** variables,
-        int* variables_count, Loop** loops, int* loops_count)
+void main_handler(FILE* file, int* significantFigs, Var** variables,
+        int* variablesCount, Loop** loops, int* loopsCount)
 {
     while (1) {
         char* line = read_line(file);
@@ -420,9 +420,9 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
                 fprintf(stdout, "There are no variables.\n");
             } else {
                 fprintf(stdout, "Variables:\n");
-                for (int i = 0; i < (*variables_count); i++) {
+                for (int i = 0; i < (*variablesCount); i++) {
                     fprintf(stdout, "%s = %.*g\n", (*variables)[i].name,
-                            *significant_figs, (*variables)[i].value);
+                            *significantFigs, (*variables)[i].value);
                 }
             }
 
@@ -430,12 +430,12 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
                 fprintf(stdout, "There are no loop variables.\n");
             } else {
                 fprintf(stdout, "Loop variables:\n");
-                for (int i = 0; i < (*loops_count); i++) {
+                for (int i = 0; i < (*loopsCount); i++) {
                     fprintf(stdout, "%s = %.*g (%.*g, %.*g, %.*g)\n",
-                            (*loops)[i].name, *significant_figs,
-                            (*loops)[i].value, *significant_figs,
-                            (*loops)[i].start, *significant_figs,
-                            (*loops)[i].increment, *significant_figs,
+                            (*loops)[i].name, *significantFigs,
+                            (*loops)[i].value, *significantFigs,
+                            (*loops)[i].start, *significantFigs,
+                            (*loops)[i].increment, *significantFigs,
                             (*loops)[i].end);
                 }
             }
@@ -456,31 +456,31 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
                 continue;
             }
             char* stringParse = strtok(loop_var, ",");
-            double value_start = atof(strtok(NULL, ","));
+            double valueStart = atof(strtok(NULL, ","));
             double value_increment = atof(strtok(NULL, ","));
             double value_end = atof(strtok(NULL, ","));
 
             int var_exists = 0;
-            for (int i = 0; i < (*variables_count); i++) {
+            for (int i = 0; i < (*variablesCount); i++) {
                 if (strcmp((*variables)[i].name, stringParse) == 0) {
                     free((*variables)[i].name);
 
-                    for (int l = i; l < (*variables_count) - 1; l++) {
+                    for (int l = i; l < (*variablesCount) - 1; l++) {
                         (*variables)[l] = (*variables)[l + 1];
                     }
 
-                    (*variables_count)--;
+                    (*variablesCount)--;
 
                     *variables = realloc(
-                            *variables, sizeof(Var) * (*variables_count));
+                            *variables, sizeof(Var) * (*variablesCount));
                     break;
                 }
             }
 
-            for (int i = 0; i < (*loops_count); i++) {
+            for (int i = 0; i < (*loopsCount); i++) {
                 if (strcmp((*loops)[i].name, stringParse) == 0) {
-                    (*loops)[i].value = value_start;
-                    (*loops)[i].start = value_start;
+                    (*loops)[i].value = valueStart;
+                    (*loops)[i].start = valueStart;
                     (*loops)[i].increment = value_increment;
                     (*loops)[i].end = value_end;
                     var_exists = 1;
@@ -489,15 +489,15 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
             }
 
             if (!var_exists) {
-                *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));
+                *loops = realloc(*loops, sizeof(Loop) * (*loopsCount + 1));
 
-                (*loops)[*loops_count].name = malloc(strlen(stringParse) + 1);
-                strcpy((*loops)[*loops_count].name, stringParse);
-                (*loops)[*loops_count].value = value_start;
-                (*loops)[*loops_count].start = value_start;
-                (*loops)[*loops_count].increment = value_increment;
-                (*loops)[*loops_count].end = value_end;
-                (*loops_count)++;
+                (*loops)[*loopsCount].name = malloc(strlen(stringParse) + 1);
+                strcpy((*loops)[*loopsCount].name, stringParse);
+                (*loops)[*loopsCount].value = valueStart;
+                (*loops)[*loopsCount].start = valueStart;
+                (*loops)[*loopsCount].increment = value_increment;
+                (*loops)[*loopsCount].end = value_end;
+                (*loopsCount)++;
             }
 
         } else {
@@ -507,13 +507,13 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
                 int error_compile = 0;
 
                 te_variable* vars = struct_to_te_var(
-                        variables, loops, variables_count, loops_count);
+                        variables, loops, variablesCount, loopsCount);
 
                 te_expr* expr = te_compile(line, vars,
-                        (*variables_count) + (*loops_count), &error_compile);
+                        (*variablesCount) + (*loopsCount), &error_compile);
                 double result = te_eval(expr);
                 if (error_compile == 0) {
-                    fprintf(stdout, "Result = %.*g\n", *significant_figs,
+                    fprintf(stdout, "Result = %.*g\n", *significantFigs,
                             result);
                 } else {
                     fprintf(stderr,
@@ -540,9 +540,9 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
                 }
 
                 te_variable* vars = struct_to_te_var(
-                        variables, loops, variables_count, loops_count);
+                        variables, loops, variablesCount, loopsCount);
                 te_expr* expr = te_compile(rhs, vars,
-                        (*variables_count) + (*loops_count), &error_compile);
+                        (*variablesCount) + (*loopsCount), &error_compile);
 
                 if (error_compile != 0) {
                     fprintf(stderr,
@@ -551,7 +551,7 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
                 } else {
                     double result = 0;
                     int var_exists = 0;
-                    for (int i = 0; i < (*variables_count); i++) {
+                    for (int i = 0; i < (*variablesCount); i++) {
                         if (strcmp((*variables)[i].name, trimmed_lhs) == 0) {
                             result = te_eval(expr);
                             (*variables)[i].value = result;
@@ -560,7 +560,7 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
                         }
                     }
 
-                    for (int i = 0; i < (*loops_count); i++) {
+                    for (int i = 0; i < (*loopsCount); i++) {
                         if (strcmp((*loops)[i].name, trimmed_lhs) == 0) {
                             result = te_eval(expr);
                             (*loops)[i].value = result;
@@ -571,22 +571,22 @@ void main_handler(FILE* file, int* significant_figs, Var** variables,
 
                     if (!var_exists) {
                         *variables = realloc(*variables,
-                                sizeof(Var) * (*variables_count + 1));
+                                sizeof(Var) * (*variablesCount + 1));
 
-                        (*variables)[*variables_count].name
+                        (*variables)[*variablesCount].name
                                 = malloc(strlen(trimmed_lhs) + 1);
-                        strcpy((*variables)[*variables_count].name,
+                        strcpy((*variables)[*variablesCount].name,
                                 trimmed_lhs);
 
                         result = te_eval(expr);
 
-                        (*variables)[*variables_count].value = result;
+                        (*variables)[*variablesCount].value = result;
 
-                        (*variables_count)++;
+                        (*variablesCount)++;
                     }
 
                     fprintf(stdout, "%s = %.*g\n", trimmed_lhs,
-                            *significant_figs, result);
+                            *significantFigs, result);
                 }
             }
         }
@@ -599,12 +599,12 @@ int main(int argc, char** argv)
     Loop* loops = NULL;
     FILE* file = NULL;
 
-    int variables_count = 0;
-    int loops_count = 0;
-    int significant_figs = 4;
+    int variablesCount = 0;
+    int loopsCount = 0;
+    int significantFigs = 4;
 
-    command_arg_check(argc, argv, &variables, &loops, &variables_count,
-            &loops_count, &significant_figs, &file);
+    command_arg_check(argc, argv, &variables, &loops, &variablesCount,
+            &loopsCount, &significantFigs, &file);
 
     fprintf(stdout,
             "Welcome to uqexpr.\nThis program was written by s4808239.\n");
@@ -613,8 +613,8 @@ int main(int argc, char** argv)
         fprintf(stdout, "There are no variables.\n");
     } else {
         fprintf(stdout, "Variables:\n");
-        for (int i = 0; i < variables_count; i++) {
-            fprintf(stdout, "%s = %.*g\n", variables[i].name, significant_figs,
+        for (int i = 0; i < variablesCount; i++) {
+            fprintf(stdout, "%s = %.*g\n", variables[i].name, significantFigs,
                     variables[i].value);
         }
     }
@@ -623,11 +623,11 @@ int main(int argc, char** argv)
         fprintf(stdout, "There are no loop variables.\n");
     } else {
         fprintf(stdout, "Loop variables:\n");
-        for (int i = 0; i < loops_count; i++) {
+        for (int i = 0; i < loopsCount; i++) {
             fprintf(stdout, "%s = %.*g (%.*g, %.*g, %.*g)\n", loops[i].name,
-                    significant_figs, loops[i].value, significant_figs,
-                    loops[i].start, significant_figs, loops[i].increment,
-                    significant_figs, loops[i].end);
+                    significantFigs, loops[i].value, significantFigs,
+                    loops[i].start, significantFigs, loops[i].increment,
+                    significantFigs, loops[i].end);
         }
     }
 
@@ -635,11 +635,11 @@ int main(int argc, char** argv)
         fprintf(stdout,
                 "Please enter your expressions and assignment operations to be "
                 "evaluated.\n");
-        main_handler(stdin, &significant_figs, &variables, &variables_count,
-                &loops, &loops_count);
+        main_handler(stdin, &significantFigs, &variables, &variablesCount,
+                &loops, &loopsCount);
     } else {
-        main_handler(file, &significant_figs, &variables, &variables_count,
-                &loops, &loops_count);
+        main_handler(file, &significantFigs, &variables, &variablesCount,
+                &loops, &loopsCount);
     }
 
     return 0;
