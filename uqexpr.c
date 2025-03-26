@@ -449,18 +449,18 @@ void main_handler(FILE* file, int* significantFigs, Var** variables,
                     continue;
                 }
             }
-            char* loop_var = strtok(NULL, " ");
-            int check = loop_check_op(loop_var);
+            char* loopVar = strtok(NULL, " ");
+            int check = loop_check_op(loopVar);
 
             if (check == 1) {
                 continue;
             }
-            char* stringParse = strtok(loop_var, ",");
+            char* stringParse = strtok(loopVar, ",");
             double valueStart = atof(strtok(NULL, ","));
-            double value_increment = atof(strtok(NULL, ","));
-            double value_end = atof(strtok(NULL, ","));
+            double valueIncrement = atof(strtok(NULL, ","));
+            double valueEnd = atof(strtok(NULL, ","));
 
-            int var_exists = 0;
+            int varExists = 0;
             for (int i = 0; i < (*variablesCount); i++) {
                 if (strcmp((*variables)[i].name, stringParse) == 0) {
                     free((*variables)[i].name);
@@ -481,38 +481,38 @@ void main_handler(FILE* file, int* significantFigs, Var** variables,
                 if (strcmp((*loops)[i].name, stringParse) == 0) {
                     (*loops)[i].value = valueStart;
                     (*loops)[i].start = valueStart;
-                    (*loops)[i].increment = value_increment;
-                    (*loops)[i].end = value_end;
-                    var_exists = 1;
+                    (*loops)[i].increment = valueIncrement;
+                    (*loops)[i].end = valueEnd;
+                    varExists = 1;
                     break;
                 }
             }
 
-            if (!var_exists) {
+            if (!varExists) {
                 *loops = realloc(*loops, sizeof(Loop) * (*loopsCount + 1));
 
                 (*loops)[*loopsCount].name = malloc(strlen(stringParse) + 1);
                 strcpy((*loops)[*loopsCount].name, stringParse);
                 (*loops)[*loopsCount].value = valueStart;
                 (*loops)[*loopsCount].start = valueStart;
-                (*loops)[*loopsCount].increment = value_increment;
-                (*loops)[*loopsCount].end = value_end;
+                (*loops)[*loopsCount].increment = valueIncrement;
+                (*loops)[*loopsCount].end = valueEnd;
                 (*loopsCount)++;
             }
 
         } else {
-            char** separated_line = separate_line(line, '=');
+            char** separatedLine = separate_line(line, '=');
 
-            if (separated_line[1] == NULL) {
-                int error_compile = 0;
+            if (separatedLine[1] == NULL) {
+                int errorCompile = 0;
 
                 te_variable* vars = struct_to_te_var(
                         variables, loops, variablesCount, loopsCount);
 
                 te_expr* expr = te_compile(line, vars,
-                        (*variablesCount) + (*loopsCount), &error_compile);
+                        (*variablesCount) + (*loopsCount), &errorCompile);
                 double result = te_eval(expr);
-                if (error_compile == 0) {
+                if (errorCompile == 0) {
                     fprintf(stdout, "Result = %.*g\n", *significantFigs,
                             result);
                 } else {
@@ -521,19 +521,19 @@ void main_handler(FILE* file, int* significantFigs, Var** variables,
                             "operation\n");
                 }
             } else {
-                char* lhs = separated_line[0];
-                char* rhs = separated_line[1];
-                int error_compile = 0;
+                char* lhs = separatedLine[0];
+                char* rhs = separatedLine[1];
+                int errorCompile = 0;
 
-                char* trimmed_lhs = malloc(strlen(lhs) + 1);
+                char* trimmedLhs = malloc(strlen(lhs) + 1);
                 for (size_t i = 0; i < strlen(lhs); i++) {
                     if (!isspace(lhs[i])) {
-                        size_t length = strlen(trimmed_lhs);
-                        trimmed_lhs[length] = lhs[i];
-                        trimmed_lhs[length + 1] = '\0';
+                        size_t length = strlen(trimmedLhs);
+                        trimmedLhs[length] = lhs[i];
+                        trimmedLhs[length + 1] = '\0';
                     }
                 }
-                int check = variable_check_name_op(trimmed_lhs);
+                int check = variable_check_name_op(trimmedLhs);
 
                 if (check == 1) {
                     continue;
@@ -542,41 +542,41 @@ void main_handler(FILE* file, int* significantFigs, Var** variables,
                 te_variable* vars = struct_to_te_var(
                         variables, loops, variablesCount, loopsCount);
                 te_expr* expr = te_compile(rhs, vars,
-                        (*variablesCount) + (*loopsCount), &error_compile);
+                        (*variablesCount) + (*loopsCount), &errorCompile);
 
-                if (error_compile != 0) {
+                if (errorCompile != 0) {
                     fprintf(stderr,
                             "Invalid command, expression or assignment "
                             "operation\n");
                 } else {
                     double result = 0;
-                    int var_exists = 0;
+                    int varExists = 0;
                     for (int i = 0; i < (*variablesCount); i++) {
-                        if (strcmp((*variables)[i].name, trimmed_lhs) == 0) {
+                        if (strcmp((*variables)[i].name, trimmedLhs) == 0) {
                             result = te_eval(expr);
                             (*variables)[i].value = result;
-                            var_exists = 1;
+                            varExists = 1;
                             break;
                         }
                     }
 
                     for (int i = 0; i < (*loopsCount); i++) {
-                        if (strcmp((*loops)[i].name, trimmed_lhs) == 0) {
+                        if (strcmp((*loops)[i].name, trimmedLhs) == 0) {
                             result = te_eval(expr);
                             (*loops)[i].value = result;
-                            var_exists = 1;
+                            varExists = 1;
                             break;
                         }
                     }
 
-                    if (!var_exists) {
+                    if (!varExists) {
                         *variables = realloc(*variables,
                                 sizeof(Var) * (*variablesCount + 1));
 
                         (*variables)[*variablesCount].name
-                                = malloc(strlen(trimmed_lhs) + 1);
+                                = malloc(strlen(trimmedLhs) + 1);
                         strcpy((*variables)[*variablesCount].name,
-                                trimmed_lhs);
+                                trimmedLhs);
 
                         result = te_eval(expr);
 
@@ -585,7 +585,7 @@ void main_handler(FILE* file, int* significantFigs, Var** variables,
                         (*variablesCount)++;
                     }
 
-                    fprintf(stdout, "%s = %.*g\n", trimmed_lhs,
+                    fprintf(stdout, "%s = %.*g\n", trimmedLhs,
                             *significantFigs, result);
                 }
             }
