@@ -50,13 +50,15 @@ int variable_check_name_op(char* variable_name)
 {
     if (!((size_t)1 <= strlen(variable_name)
                 && strlen(variable_name) <= (size_t)25)) {
-        fprintf(stderr, "Invalid command, expression or assignment operation\n");
+        fprintf(stderr,
+                "Invalid command, expression or assignment operation\n");
         return 1;
     }
 
     for (size_t l = 0; l < strlen(variable_name); l++) {
         if (isalpha(variable_name[l]) == 0) {
-            fprintf(stderr, "Invalid command, expression or assignment operation\n");
+            fprintf(stderr,
+                    "Invalid command, expression or assignment operation\n");
             return 1;
         }
     }
@@ -154,43 +156,43 @@ void variable_check_sigfig(char* variable)
     }
 }
 
-int loop_check_op(char* variable)                                              
-{                                                                                
-    if (variable == NULL) {                                                      
-        fprintf(stderr,                                                          
-                "Invalid command, expression or assignment operation\n");        
-        return 1;                                                                
-    }                                                                            
-                                                                                 
-    char* string_parse = strtok(strdup(variable), ",");                          
-    variable_check_name(string_parse);                                           
-                                                                                 
-    char* start = strtok(NULL, ",");                                             
-    char* increment = strtok(NULL, ",");                                         
-    char* end = strtok(NULL, ",");                                               
-    if (string_parse == NULL || start == NULL || increment == NULL               
-            || end == NULL) {                                                    
-        fprintf(stderr,                                                          
-                "Invalid command, expression or assignment operation\n");        
-        return 1;                                                                
-    }                                                                            
-                                                                                 
-    value_check(start);                                                          
-    value_check(increment);                                                      
-    value_check(end);                                                            
-                                                                                 
-    double start_d = atof(start);                                                
-    double increment_d = atof(increment);                                        
-    double end_d = atof(end);                                                    
-                                                                                 
-    if ((increment_d == 0) || ((start_d < end_d) && (increment_d < 0))           
-            || ((start_d > end_d) && (increment_d > 0))) {                       
-        fprintf(stderr,                                                          
-                "Invalid command, expression or assignment operation\n");        
-        return 1;                                                                
-    }                                                                            
-    return 0;                                                                    
-} 
+int loop_check_op(char* variable)
+{
+    if (variable == NULL) {
+        fprintf(stderr,
+                "Invalid command, expression or assignment operation\n");
+        return 1;
+    }
+
+    char* string_parse = strtok(strdup(variable), ",");
+    variable_check_name(string_parse);
+
+    char* start = strtok(NULL, ",");
+    char* increment = strtok(NULL, ",");
+    char* end = strtok(NULL, ",");
+    if (string_parse == NULL || start == NULL || increment == NULL
+            || end == NULL) {
+        fprintf(stderr,
+                "Invalid command, expression or assignment operation\n");
+        return 1;
+    }
+
+    value_check(start);
+    value_check(increment);
+    value_check(end);
+
+    double start_d = atof(start);
+    double increment_d = atof(increment);
+    double end_d = atof(end);
+
+    if ((increment_d == 0) || ((start_d < end_d) && (increment_d < 0))
+            || ((start_d > end_d) && (increment_d > 0))) {
+        fprintf(stderr,
+                "Invalid command, expression or assignment operation\n");
+        return 1;
+    }
+    return 0;
+}
 
 void free_variables(Var* variables, int variables_count)
 {
@@ -367,7 +369,9 @@ char** separate_line(char* string, char delim)
     return tokens;
 }
 
-te_variable* struct_to_te_var(Var** variables, Loop** loops, int* variables_count, int* loops_count) {
+te_variable* struct_to_te_var(
+        Var** variables, Loop** loops, int* variables_count, int* loops_count)
+{
     int var_count_checked;
     if (variables_count != NULL) {
         var_count_checked = (*variables_count);
@@ -393,12 +397,12 @@ te_variable* struct_to_te_var(Var** variables, Loop** loops, int* variables_coun
         result[var_count_checked + i].name = (*loops)[i].name;
         result[var_count_checked + i].address = &((*loops)[i].value);
     }
-    
+
     return result;
-    
 }
 
-void main_handler(FILE* file, int* significant_figs, Var** variables, int* variables_count, Loop** loops, int* loops_count)
+void main_handler(FILE* file, int* significant_figs, Var** variables,
+        int* variables_count, Loop** loops, int* loops_count)
 {
     while (1) {
         char* line = read_line(file);
@@ -417,8 +421,8 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
             } else {
                 fprintf(stdout, "Variables:\n");
                 for (int i = 0; i < (*variables_count); i++) {
-                    fprintf(stdout, "%s = %.*g\n", (*variables)[i].name, *significant_figs,
-                        (*variables)[i].value);
+                    fprintf(stdout, "%s = %.*g\n", (*variables)[i].name,
+                            *significant_figs, (*variables)[i].value);
                 }
             }
 
@@ -427,66 +431,72 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
             } else {
                 fprintf(stdout, "Loop variables:\n");
                 for (int i = 0; i < (*loops_count); i++) {
-                    fprintf(stdout, "%s = %.*g (%.*g, %.*g, %.*g)\n", (*loops)[i].name,
-                        *significant_figs, (*loops)[i].value, *significant_figs,
-                        (*loops)[i].start, *significant_figs, (*loops)[i].increment,
-                        *significant_figs, (*loops)[i].end);
+                    fprintf(stdout, "%s = %.*g (%.*g, %.*g, %.*g)\n",
+                            (*loops)[i].name, *significant_figs,
+                            (*loops)[i].value, *significant_figs,
+                            (*loops)[i].start, *significant_figs,
+                            (*loops)[i].increment, *significant_figs,
+                            (*loops)[i].end);
                 }
             }
-        } else if (strcmp(strtok(strdup(line), " "), "@range") == 0) {                 
+        } else if (strcmp(strtok(strdup(line), " "), "@range") == 0) {
             for (int i = 0; i < 6; i++) {
-                if (line[i] == ' ' || (line[i+1] == ' ' && line[i+2] == ' ')) {
-                    fprintf(stderr, "Invalid command, expression or assignment operation\n");
+                if (line[i] == ' '
+                        || (line[i + 1] == ' ' && line[i + 2] == ' ')) {
+                    fprintf(stderr,
+                            "Invalid command, expression or assignment "
+                            "operation\n");
                     continue;
                 }
             }
-            char* loop_var = strtok(NULL, " ");                                  
-            int check = loop_check_op(loop_var);                                 
-                                                                         
-            if (check == 1) {                                                    
-                continue;                                                        
+            char* loop_var = strtok(NULL, " ");
+            int check = loop_check_op(loop_var);
+
+            if (check == 1) {
+                continue;
             }
-            char* string_parse = strtok(loop_var, ",");                          
-            double value_start = atof(strtok(NULL, ","));                                                                                     
-            double value_increment = atof(strtok(NULL, ","));                        
-            double value_end = atof(strtok(NULL, ","));                        
-                                                                         
+            char* string_parse = strtok(loop_var, ",");
+            double value_start = atof(strtok(NULL, ","));
+            double value_increment = atof(strtok(NULL, ","));
+            double value_end = atof(strtok(NULL, ","));
+
             int var_exists = 0;
             for (int i = 0; i < (*variables_count); i++) {
                 if (strcmp((*variables)[i].name, string_parse) == 0) {
                     free((*variables)[i].name);
 
                     for (int l = i; l < (*variables_count) - 1; l++) {
-                        (*variables)[l] = (*variables)[l+1];
+                        (*variables)[l] = (*variables)[l + 1];
                     }
 
                     (*variables_count)--;
 
-                    *variables = realloc(*variables, sizeof(Var) * (*variables_count));
+                    *variables = realloc(
+                            *variables, sizeof(Var) * (*variables_count));
                     break;
                 }
             }
 
             for (int i = 0; i < (*loops_count); i++) {
-               if (strcmp((*loops)[i].name, string_parse) == 0) {
-                   (*loops)[i].value = value_start;                          
-                   (*loops)[i].start = value_start;                          
-                   (*loops)[i].increment = value_increment;          
-                   (*loops)[i].end = value_end; 
-                   var_exists = 1;
-                   break;
-               }
+                if (strcmp((*loops)[i].name, string_parse) == 0) {
+                    (*loops)[i].value = value_start;
+                    (*loops)[i].start = value_start;
+                    (*loops)[i].increment = value_increment;
+                    (*loops)[i].end = value_end;
+                    var_exists = 1;
+                    break;
+                }
             }
 
             if (!var_exists) {
-                *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));         
-                                                                         
-                (*loops)[*loops_count].name = malloc(strlen(string_parse) + 1);      
-                strcpy((*loops)[*loops_count].name, string_parse); 
-                (*loops)[*loops_count].value = value_start;                          
-                (*loops)[*loops_count].start = value_start;                          
-                (*loops)[*loops_count].increment = value_increment;          
-                (*loops)[*loops_count].end = value_end; 
+                *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));
+
+                (*loops)[*loops_count].name = malloc(strlen(string_parse) + 1);
+                strcpy((*loops)[*loops_count].name, string_parse);
+                (*loops)[*loops_count].value = value_start;
+                (*loops)[*loops_count].start = value_start;
+                (*loops)[*loops_count].increment = value_increment;
+                (*loops)[*loops_count].end = value_end;
                 (*loops_count)++;
             }
 
@@ -495,10 +505,12 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
 
             if (separated_line[1] == NULL) {
                 int error_compile = 0;
-                
-                te_variable* vars = struct_to_te_var(variables, loops, variables_count, loops_count);
 
-                te_expr* expr = te_compile(line, vars, (*variables_count)+(*loops_count), &error_compile);
+                te_variable* vars = struct_to_te_var(
+                        variables, loops, variables_count, loops_count);
+
+                te_expr* expr = te_compile(line, vars,
+                        (*variables_count) + (*loops_count), &error_compile);
                 double result = te_eval(expr);
                 if (error_compile == 0) {
                     fprintf(stdout, "Result = %.*g\n", *significant_figs,
@@ -522,14 +534,16 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                     }
                 }
                 int check = variable_check_name_op(trimmed_lhs);
-                 
+
                 if (check == 1) {
                     continue;
                 }
-                
-                te_variable* vars = struct_to_te_var(variables, loops, variables_count, loops_count);
-                te_expr* expr = te_compile(rhs, vars, (*variables_count)+(*loops_count), &error_compile);
-                
+
+                te_variable* vars = struct_to_te_var(
+                        variables, loops, variables_count, loops_count);
+                te_expr* expr = te_compile(rhs, vars,
+                        (*variables_count) + (*loops_count), &error_compile);
+
                 if (error_compile != 0) {
                     fprintf(stderr,
                             "Invalid command, expression or assignment "
@@ -556,13 +570,14 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                     }
 
                     if (!var_exists) {
-                        *variables
-                            = realloc(*variables, sizeof(Var) * (*variables_count + 1));
+                        *variables = realloc(*variables,
+                                sizeof(Var) * (*variables_count + 1));
 
                         (*variables)[*variables_count].name
-                            = malloc(strlen(trimmed_lhs) + 1);
-                        strcpy((*variables)[*variables_count].name, trimmed_lhs);
-              
+                                = malloc(strlen(trimmed_lhs) + 1);
+                        strcpy((*variables)[*variables_count].name,
+                                trimmed_lhs);
+
                         result = te_eval(expr);
 
                         (*variables)[*variables_count].value = result;
@@ -570,8 +585,8 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                         (*variables_count)++;
                     }
 
-                    fprintf(stdout, "%s = %.*g\n", trimmed_lhs, *significant_figs,
-                            result);
+                    fprintf(stdout, "%s = %.*g\n", trimmed_lhs,
+                            *significant_figs, result);
                 }
             }
         }
@@ -620,9 +635,11 @@ int main(int argc, char** argv)
         fprintf(stdout,
                 "Please enter your expressions and assignment operations to be "
                 "evaluated.\n");
-        main_handler(stdin, &significant_figs, &variables, &variables_count, &loops, &loops_count);
+        main_handler(stdin, &significant_figs, &variables, &variables_count,
+                &loops, &loops_count);
     } else {
-        main_handler(file, &significant_figs, &variables, &variables_count, &loops, &loops_count);
+        main_handler(file, &significant_figs, &variables, &variables_count,
+                &loops, &loops_count);
     }
 
     return 0;
