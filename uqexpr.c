@@ -154,6 +154,44 @@ void variable_check_sigfig(char* variable)
     }
 }
 
+int loop_check_op(char* variable)                                              
+{                                                                                
+    if (variable == NULL) {                                                      
+        fprintf(stderr,                                                          
+                "Invalid command, expression or assignment operation\n");        
+        return 1;                                                                
+    }                                                                            
+                                                                                 
+    char* string_parse = strtok(strdup(variable), ",");                          
+    variable_check_name(string_parse);                                           
+                                                                                 
+    char* start = strtok(NULL, ",");                                             
+    char* increment = strtok(NULL, ",");                                         
+    char* end = strtok(NULL, ",");                                               
+    if (string_parse == NULL || start == NULL || increment == NULL               
+            || end == NULL) {                                                    
+        fprintf(stderr,                                                          
+                "Invalid command, expression or assignment operation\n");        
+        return 1;                                                                
+    }                                                                            
+                                                                                 
+    value_check(start);                                                          
+    value_check(increment);                                                      
+    value_check(end);                                                            
+                                                                                 
+    double start_d = atof(start);                                                
+    double increment_d = atof(increment);                                        
+    double end_d = atof(end);                                                    
+                                                                                 
+    if ((increment_d == 0) || ((start_d < end_d) && (increment_d < 0))           
+            || ((start_d > end_d) && (increment_d > 0))) {                       
+        fprintf(stderr,                                                          
+                "Invalid command, expression or assignment operation\n");        
+        return 1;                                                                
+    }                                                                            
+    return 0;                                                                    
+} 
+
 void free_variables(Var* variables, int variables_count)
 {
     for (int i = 0; i < variables_count; i++) {
@@ -370,6 +408,7 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
             fprintf(stdout, "Thank you for using uqexpr.\n");
             exit(0);
         }
+
         if (line[0] == '#') {
             continue;
         } else if (strcmp(line, "@print") == 0) {
@@ -394,6 +433,63 @@ void main_handler(FILE* file, int* significant_figs, Var** variables, int* varia
                         *significant_figs, (*loops)[i].end);
                 }
             }
+        } else if (strcmp(strtok(strdup(line), " "), "@range") == 0) {                 
+            for (int i = 0; i < 6; i++) {
+                if (line[i] == ' ' || (line[i+1] == ' ' && line[i+2] == ' ')) {
+                    fprintf(stderr, "Invalid command, expression or assignment operation\n");
+                    continue;
+                }
+            }
+            char* loop_var = strtok(NULL, " ");                                  
+            int check = loop_check_op(loop_var);                                 
+                                                                         
+            if (check == 1) {                                                    
+                continue;                                                        
+            }
+            char* string_parse = strtok(loop_var, ",");                          
+            double value_start = atof(strtok(NULL, ","));                                                                                     
+            double value_increment = atof(strtok(NULL, ","));                        
+            double value_end = atof(strtok(NULL, ","));                        
+                                                                         
+            int var_exists = 0;
+            for (int i = 0; i < (*variables_count); i++) {
+                if (strcmp((*variables)[i].name, string_parse) == 0) {
+                    free((*variables)[i].name);
+
+                    for (int l = i; l < (*variables_count) - 1; l++) {
+                        (*variables)[l] = (*variables)[l+1];
+                    }
+
+                    (*variables_count)--;
+
+                    *variables = realloc(*variables, sizeof(Var) * (*variables_count));
+                    break;
+                }
+            }
+
+            for (int i = 0; i < (*loops_count); i++) {
+               if (strcmp((*loops)[i].name, string_parse) == 0) {
+                   (*loops)[i].value = value_start;                          
+                   (*loops)[i].start = value_start;                          
+                   (*loops)[i].increment = value_increment;          
+                   (*loops)[i].end = value_end; 
+                   var_exists = 1;
+                   break;
+               }
+            }
+
+            if (!var_exists) {
+                *loops = realloc(*loops, sizeof(Loop) * (*loops_count + 1));         
+                                                                         
+                (*loops)[*loops_count].name = malloc(strlen(string_parse) + 1);      
+                strcpy((*loops)[*loops_count].name, string_parse); 
+                (*loops)[*loops_count].value = value_start;                          
+                (*loops)[*loops_count].start = value_start;                          
+                (*loops)[*loops_count].increment = value_increment;          
+                (*loops)[*loops_count].end = value_end; 
+                (*loops_count)++;
+            }
+
         } else {
             char** separated_line = separate_line(line, '=');
 
